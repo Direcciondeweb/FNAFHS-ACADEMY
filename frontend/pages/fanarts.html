@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>★ FNAFHS 📚 ACADEMY ★ - Fanarts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/frontend/css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        window.API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8080'
+            : 'https://fnafhs-academy-backend.onrender.com';
+    </script>
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <div class="brand">
+            <img id="headerLogo" class="logo-img" src="" alt="Logo" style="display:none;">
+            <h1>★ FNAFHS 📚 ACADEMY ★</h1>
+        </div>
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li class="nav-item"><a href="/frontend/pages/index.html" class="nav-link"><i class="fas fa-home"></i><span>Inicio</span></a></li>
+                <li class="nav-item"><a href="/frontend/pages/index.html#personajes" class="nav-link"><i class="fas fa-user"></i><span>Personajes</span></a></li>
+                <li class="nav-item"><a href="/frontend/pages/fanarts.html" class="nav-link active"><i class="fas fa-image"></i><span>Fanarts</span></a></li>
+                <li class="nav-item"><a href="/frontend/pages/arte.html" class="nav-link"><i class="fas fa-palette"></i><span>Arte</span></a></li>
+                <li class="nav-item"><a href="/frontend/pages/descartados.html" class="nav-link"><i class="fas fa-trash"></i><span>Descartados</span></a></li>
+                <li class="nav-item" id="navMiCuenta" style="display:none;"><a href="#" id="miCuentaLink" class="nav-link"><i class="fas fa-user-circle"></i><span>Mi Cuenta</span></a></li>
+                <li class="nav-item" id="navLogin"><a href="/frontend/pages/login.html" class="nav-link"><i class="fas fa-sign-in-alt"></i><span>Login</span></a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="fanarts-section">
+    <div class="section-header">
+        <h2 class="section-title">Fanarts</h2>
+    </div>
+    <div class="coming-soon">
+        <p>✨ Próximamente... ✨</p>
+        <p style="margin-top: 20px;">¡Pronto podrás ver fanarts de la comunidad!</p>
+        <p style="margin-top: 10px;">Comparte tus creaciones en nuestras redes sociales</p>
+    </div>
+</section>
+
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h3>★ FNAFHS 📚 ACADEMY ★</h3>
+                <p>Reviviendo el fandom, sin importar qué :D</p>
+            </div>
+            <div class="footer-social">
+                <div class="social-links">
+                    <a href="https://www.tiktok.com/@fnafhsacademyofficial?lang=es" class="social-link" target="_blank">🎵 TikTok</a>
+                    <a href="https://discord.gg/WDzWVjzZ" class="social-link" target="_blank">💬 Discord</a>
+                    <a href="https://www.youtube.com/@fnafhsacademyofficial" class="social-link" target="_blank">🌟 Youtube</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy;★ FNAFHS ACADEMY ★ - Todos los derechos reservados</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    async function cargarLogo() {
+        try {
+            const response = await fetch(window.API_URL + '/api/logo/activo');
+            const data = await response.json();
+            const logoImg = document.getElementById('headerLogo');
+            if (logoImg && data && data.imagenUrl) {
+                logoImg.src = data.imagenUrl;
+                logoImg.style.display = 'block';
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        try {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            document.getElementById('navLogin').style.display = 'none';
+            document.getElementById('navMiCuenta').style.display = 'block';
+            if (userData.rol === 'ADMIN') {
+                document.getElementById('miCuentaLink').href = '/frontend/pages/dashboard/admin.html';
+            } else if (userData.rol === 'SUBADMIN') {
+                document.getElementById('miCuentaLink').href = '/frontend/pages/dashboard/subadmin.html';
+            } else {
+                document.getElementById('miCuentaLink').href = '/frontend/pages/dashboard/user.html';
+            }
+        } catch(e) {}
+    }
+
+    cargarLogo();
+</script>
+</body>
+</html>

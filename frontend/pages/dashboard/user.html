@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNAFHS ACADEMY - Mi Perfil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/frontend/css/estilos.css">
+    <script>
+        window.API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8080'
+            : 'https://fnafhs-academy-backend.onrender.com';
+    </script>
+    <style>
+        .profile-card { background: #1a1a2e; border-radius: 12px; padding: 20px; border: 1px solid rgba(208, 252, 11, 0.2); }
+        body { background: linear-gradient(180deg, #4c0867 12%, #370505 40%); min-height: 100vh; }
+        .logo-placeholder { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+        <div class="brand">
+            <div id="headerLogoContainer" class="logo-placeholder">
+                <img id="headerLogo" class="logo-img" src="" alt="Logo" style="display:none; width:40px; height:40px; object-fit:cover; border-radius:50%;">
+            </div>
+            <h1>★ FNAFHS 📚 ACADEMY ★</h1>
+        </div>
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li class="nav-item"><a href="/frontend/pages/dashboard/user.html" class="nav-link active"><i class="fas fa-user-circle"></i><span>Mi Perfil</span></a></li>
+                <li class="nav-item"><a href="/frontend/pages/index.html" class="nav-link"><i class="fas fa-eye"></i><span>Ver Sitio</span></a></li>
+                <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link"><i class="fas fa-sign-out-alt"></i><span>Salir</span></a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="profile-card">
+                <h4 class="mb-4" style="color: var(--oro);"><i class="fas fa-user-astronaut me-2"></i>Mi Perfil</h4>
+                <form id="perfilForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light">Usuario</label>
+                            <input type="text" id="perfilUsername" class="form-control bg-secondary text-white" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light">Rol</label>
+                            <input type="text" id="perfilRol" class="form-control bg-secondary text-white" readonly>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-light">Nombre Completo</label>
+                            <input type="text" id="perfilNombreCompleto" class="form-control bg-secondary text-white">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light">Email</label>
+                            <input type="email" id="perfilEmail" class="form-control bg-secondary text-white">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light">Teléfono</label>
+                            <input type="tel" id="perfilTelefono" class="form-control bg-secondary text-white">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-light">Dirección</label>
+                            <textarea id="perfilDireccion" class="form-control bg-secondary text-white" rows="2"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-light">Nueva Contraseña</label>
+                            <input type="password" id="perfilPassword" class="form-control bg-secondary text-white" placeholder="Dejar vacío para no cambiar">
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="btnActualizarPerfil"><i class="fas fa-save me-2"></i>Actualizar Perfil</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="text-center mt-4">
+                <a href="/frontend/pages/index.html" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Volver al Sitio</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let usuarioActual = null;
+
+    async function cargarPerfil() {
+        try {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            const response = await fetch(window.API_URL + `/api/usuarios/${userData.id}`);
+            usuarioActual = await response.json();
+            
+            document.getElementById('perfilUsername').value = usuarioActual.username || '';
+            document.getElementById('perfilRol').value = usuarioActual.rol || '';
+            document.getElementById('perfilNombreCompleto').value = usuarioActual.nombreCompleto || '';
+            document.getElementById('perfilEmail').value = usuarioActual.email || '';
+            document.getElementById('perfilTelefono').value = usuarioActual.telefono || '';
+            document.getElementById('perfilDireccion').value = usuarioActual.direccion || '';
+        } catch(e) {
+            console.error('Error cargando perfil:', e);
+        }
+    }
+
+    async function cargarLogoActivoHeader() {
+        try {
+            let res = await fetch(window.API_URL+'/api/logo/activo');
+            let data = await res.json();
+            let logoImg = document.getElementById('headerLogo');
+            if(data && data.imagenUrl) { logoImg.src = data.imagenUrl; logoImg.style.display = 'block'; }
+            else { logoImg.style.display = 'none'; }
+        } catch(e){}
+    }
+
+    document.getElementById('btnActualizarPerfil').onclick = async () => {
+        let usuario = {
+            username: document.getElementById('perfilUsername').value,
+            nombreCompleto: document.getElementById('perfilNombreCompleto').value,
+            email: document.getElementById('perfilEmail').value,
+            telefono: document.getElementById('perfilTelefono').value,
+            direccion: document.getElementById('perfilDireccion').value,
+            rol: usuarioActual.rol,
+            estado: 1
+        };
+        let nuevaPass = document.getElementById('perfilPassword').value;
+        if(nuevaPass) usuario.password = nuevaPass;
+
+        Swal.fire({title:'Actualizando...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
+        
+        let res = await fetch(window.API_URL+`/api/usuarios/${usuarioActual.id}`, {
+            method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(usuario)
+        });
+        
+        if(res.ok) {
+            // Actualizar localStorage con nuevos datos
+            const updatedUser = await res.json();
+            localStorage.setItem('userData', JSON.stringify(updatedUser));
+            Swal.fire('Éxito','Perfil actualizado','success');
+            document.getElementById('perfilPassword').value = '';
+            cargarPerfil();
+        } else {
+            Swal.fire('Error','Error al actualizar','error');
+        }
+    };
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        window.location.href = '/frontend/pages/index.html';
+    });
+
+    // Verificar autenticación
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        window.location.href = '/frontend/pages/login.html';
+    }
+
+    cargarPerfil();
+    cargarLogoActivoHeader();
+</script>
+</body>
+</html>

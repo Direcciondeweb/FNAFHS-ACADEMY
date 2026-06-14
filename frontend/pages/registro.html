@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNAFHS ACADEMY - Crear Cuenta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/frontend/css/estilos.css">
+    <script>
+        window.API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8080'
+            : 'https://fnafhs-academy-backend.onrender.com';
+    </script>
+    <style>
+        .logo-circle { width: 90px; height: 90px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: hidden; }
+        .logo-circle img { width: 100%; height: 100%; object-fit: cover; }
+        body { padding-top: 0; min-height: 100vh; display: flex; align-items: center; background: linear-gradient(180deg, #4c0867 12%, #370505 40%); }
+        .card { background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white text-center border-0 py-4">
+                    <div class="logo-circle mb-3" id="logoContainer"></div>
+                    <h3 class="mb-0 fw-bold">FNAFHS ACADEMY</h3>
+                    <p class="text-warning small mb-0">Crear Nueva Cuenta</p>
+                </div>
+                <div class="card-body p-4">
+                    <form id="registroForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-secondary">Usuario *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark text-warning border-0"><i class="bi bi-person-fill"></i></span>
+                                    <input type="text" id="username" class="form-control border-0 bg-light" placeholder="usuario123" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-secondary">Contraseña *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark text-warning border-0"><i class="bi bi-key-fill"></i></span>
+                                    <input type="password" id="password" class="form-control border-0 bg-light" placeholder="********" required>
+                                    <button class="btn btn-outline-secondary border-0" type="button" onclick="togglePassword()">
+                                        <i class="bi bi-eye" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold text-secondary">Nombre Completo</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark text-warning border-0"><i class="bi bi-person-badge"></i></span>
+                                    <input type="text" id="nombreCompleto" class="form-control border-0 bg-light" placeholder="Juan Pérez García">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-secondary">Email *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark text-warning border-0"><i class="bi bi-envelope-fill"></i></span>
+                                    <input type="email" id="email" class="form-control border-0 bg-light" placeholder="usuario@gmail.com" required>
+                                </div>
+                                <div class="form-text text-muted small">Debe ser @gmail.com</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-secondary">Teléfono</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark text-warning border-0"><i class="bi bi-telephone-fill"></i></span>
+                                    <input type="tel" id="telefono" class="form-control border-0 bg-light" placeholder="999 999 999">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold text-secondary">Dirección</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark text-warning border-0"><i class="bi bi-geo-alt-fill"></i></span>
+                                    <textarea id="direccion" class="form-control border-0 bg-light" rows="2" placeholder="Av. Principal 123, Lima"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-dark py-2 fw-semibold"><i class="bi bi-person-check me-2"></i>Registrarse</button>
+                            <hr class="my-2">
+                            <div class="text-center">
+                                <small class="text-muted">¿Ya tienes cuenta?</small>
+                                <a href="/frontend/pages/login.html" class="btn btn-outline-warning btn-sm ms-2"><i class="bi bi-box-arrow-in-right me-1"></i>Iniciar Sesión</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mt-3"><small class="text-muted"><i class="bi bi-shield-check me-1 text-success"></i>Tus datos están seguros</small></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const icon = document.getElementById('eyeIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+
+    function validarEmail(email) { return /^[a-zA-Z0-9._-]+@gmail\.com$/.test(email); }
+
+    async function cargarLogo() {
+        try {
+            const response = await fetch(window.API_URL + '/api/logo/activo');
+            const data = await response.json();
+            const logoContainer = document.getElementById('logoContainer');
+            if (logoContainer && data && data.imagenUrl) logoContainer.innerHTML = `<img src="${data.imagenUrl}" alt="Logo">`;
+        } catch(e) { console.error(e); }
+    }
+
+    document.getElementById('registroForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        if (!validarEmail(email)) { Swal.fire("Error", "El email debe ser @gmail.com", "error"); return; }
+
+        const usuario = {
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+            nombreCompleto: document.getElementById('nombreCompleto').value,
+            email: email,
+            telefono: document.getElementById('telefono').value,
+            direccion: document.getElementById('direccion').value,
+            rol: 'USER',
+            estado: 1
+        };
+
+        Swal.fire({title: "Registrando...", allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+        
+        try {
+            const response = await fetch(window.API_URL + '/api/usuarios', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(usuario)
+            });
+            if (response.ok) {
+                Swal.fire({title: "¡Registro exitoso!", text: "Ahora puedes iniciar sesión", icon: "success", confirmButtonText: "Iniciar Sesión", confirmButtonColor: "#ffc107"})
+                    .then(() => { window.location.href = '/frontend/pages/login.html'; });
+            } else {
+                const error = await response.json();
+                throw new Error(error || 'Error al registrar usuario');
+            }
+        } catch (error) {
+            Swal.fire("Error", error.message, "error");
+        }
+    });
+    
+    cargarLogo();
+</script>
+</body>
+</html>
