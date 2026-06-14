@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,55 +7,373 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="/frontend/css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/estilos.css">
     <script>
         window.API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:8080'
             : 'https://fnafhs-academy-backend.onrender.com';
     </script>
     <style>
-        .dashboard-container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
-        .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: linear-gradient(135deg, #2a2a2a, #1a1a1a); border-radius: 16px; padding: 20px; text-align: center; border: 1px solid rgba(208, 252, 11, 0.2); transition: transform 0.3s; }
-        .stat-card:hover { transform: translateY(-5px); border-color: var(--oro); }
-        .stat-card h3 { font-size: 2rem; color: var(--oro); margin-bottom: 8px; font-weight: bold; }
-        .stat-card p { color: #ccc; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-        .dashboard-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(208, 252, 11, 0.2); padding-bottom: 10px; }
-        .tab-btn { background: linear-gradient(135deg, #2a2a2a, #1a1a1a); border: 1px solid rgba(208, 252, 11, 0.2); color: white; padding: 10px 24px; border-radius: 40px; cursor: pointer; transition: all 0.3s; font-weight: 600; }
-        .tab-btn:hover { background: linear-gradient(135deg, var(--borgoña), var(--borgoña-2)); border-color: var(--oro); transform: translateY(-2px); }
-        .tab-btn.active { background: linear-gradient(135deg, var(--borgoña), var(--borgoña-2)); border-color: var(--oro); color: white; box-shadow: 0 4px 12px rgba(208, 252, 11, 0.3); }
-        .tab-pane { display: none; background: linear-gradient(135deg, #1e1e2a, #161622); border-radius: 20px; padding: 25px; border: 1px solid rgba(208, 252, 11, 0.15); }
-        .tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(208, 252, 11, 0.1); }
-        .data-table th { color: var(--oro); font-weight: 600; }
-        .data-table td { color: #ddd; }
-        .data-table tr:hover { background: rgba(208, 252, 11, 0.05); }
-        .btn { padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.2s; }
-        .btn-primary { background: linear-gradient(135deg, var(--borgoña), var(--borgoña-2)); border: none; color: white; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(208, 252, 11, 0.3); }
-        .btn-warning { background: #f0ad4e; border: none; color: #1a1a2e; }
-        .btn-danger { background: #d9534f; border: none; }
-        .btn-info { background: #5bc0de; border: none; color: #1a1a2e; }
-        .btn-sm { padding: 4px 10px; font-size: 12px; }
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --borgoña: #fd0000;
+            --borgoña-2: #a725bb;
+            --oro: #d0fc0b;
+        }
+        
+        body {
+            background: linear-gradient(180deg, #4c0867 12%, #370505 40%);
+            min-height: 100vh;
+            padding-top: 80px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, rgba(255, 2, 2, 0.98), rgba(64, 23, 118, 0.96));
+            height: 80px;
+            display: flex;
+            align-items: center;
+            z-index: 120;
+        }
+        
+        .header-inner {
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-img {
+            height: 50px;
+            width: auto;
+            border-radius: 8px;
+            background: white;
+            padding: 5px;
+        }
+        
+        .brand h1 {
+            font-size: 1.2rem;
+            color: white;
+            margin: 0;
+        }
+        
+        .nav-list {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            margin: 0;
+        }
+        
+        .nav-list a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .nav-list a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(208, 252, 11, 0.2);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--oro);
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem;
+            color: var(--oro);
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .stat-card p {
+            color: #ccc;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        
+        .dashboard-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(208, 252, 11, 0.2);
+            padding-bottom: 10px;
+        }
+        
+        .tab-btn {
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            border: 1px solid rgba(208, 252, 11, 0.2);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .tab-btn:hover {
+            background: linear-gradient(135deg, var(--borgoña), var(--borgoña-2));
+            border-color: var(--oro);
+            transform: translateY(-2px);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--borgoña), var(--borgoña-2));
+            border-color: var(--oro);
+            color: white;
+            box-shadow: 0 4px 12px rgba(208, 252, 11, 0.3);
+        }
+        
+        .tab-pane {
+            display: none;
+            background: linear-gradient(135deg, #1e1e2a, #161622);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(208, 252, 11, 0.15);
+        }
+        
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(208, 252, 11, 0.1);
+        }
+        
+        .data-table th {
+            color: var(--oro);
+            font-weight: 600;
+        }
+        
+        .data-table td {
+            color: #ddd;
+        }
+        
+        .data-table tr:hover {
+            background: rgba(208, 252, 11, 0.05);
+        }
+        
+        .btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--borgoña), var(--borgoña-2));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(208, 252, 11, 0.3);
+        }
+        
+        .btn-warning {
+            background: #f0ad4e;
+            color: #1a1a2e;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-info {
+            background: #5bc0de;
+            color: #1a1a2e;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
         .bg-success { background: #28a745; color: white; }
         .bg-danger { background: #dc3545; color: white; }
         .bg-warning { background: #ffc107; color: #1a1a2e; }
         .bg-info { background: #17a2b8; color: white; }
         .bg-secondary { background: #6c757d; color: white; }
-        .preview-img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1050; justify-content: center; align-items: center; }
-        .modal-form { background: linear-gradient(135deg, #1e1e2a, #161622); padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; border: 1px solid var(--oro); box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
-        .modal-form h3 { color: var(--oro); margin-bottom: 20px; text-align: center; }
-        .modal-form label { display: block; margin-top: 12px; margin-bottom: 5px; color: var(--oro); font-size: 13px; font-weight: 600; }
-        .modal-form input, .modal-form select, .modal-form textarea { width: 100%; padding: 10px; background: #2a2a35; border: 1px solid rgba(208, 252, 11, 0.3); border-radius: 8px; color: white; }
-        .modal-buttons { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; }
-        .modal-close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa; transition: 0.2s; }
-        .modal-close:hover { color: var(--oro); }
-        .logo-placeholder { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        @media (max-width: 768px) { .dashboard-stats { grid-template-columns: repeat(2, 1fr); gap: 12px; } .tab-btn { padding: 6px 16px; font-size: 12px; } .stat-card h3 { font-size: 1.5rem; } }
+        
+        .preview-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1050;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-form {
+            background: linear-gradient(135deg, #1e1e2a, #161622);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--oro);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-form h3 {
+            color: var(--oro);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal-form label {
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 5px;
+            color: var(--oro);
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .modal-form input,
+        .modal-form select,
+        .modal-form textarea {
+            width: 100%;
+            padding: 10px;
+            background: #2a2a35;
+            border: 1px solid rgba(208, 252, 11, 0.3);
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+            transition: 0.2s;
+        }
+        
+        .modal-close:hover {
+            color: var(--oro);
+        }
+        
+        .video-preview {
+            width: 100px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        
+        .logo-card {
+            background: #2a2a35;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(208, 252, 11, 0.2);
+        }
+        
+        .logo-card img {
+            max-height: 80px;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .tab-btn { padding: 6px 16px; font-size: 12px; }
+            .stat-card h3 { font-size: 1.5rem; }
+            .header-inner { flex-direction: column; gap: 10px; padding: 10px 0; }
+            body { padding-top: 120px; }
+            .brand h1 { font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body>
@@ -63,15 +381,13 @@
 <header class="site-header">
     <div class="header-inner">
         <div class="brand">
-            <div id="headerLogoContainer" class="logo-placeholder">
-                <img id="headerLogo" class="logo-img" src="" alt="Logo" style="display:none; width:40px; height:40px; object-fit:cover; border-radius:50%;">
-            </div>
+            <img id="headerLogo" class="logo-img" src="" alt="Logo" style="display:none;">
             <h1>★ FNAFHS 📚 ACADEMY ★</h1>
         </div>
         <nav class="main-nav">
             <ul class="nav-list">
-                <li class="nav-item"><a href="/frontend/pages/dashboard/admin.html" class="nav-link active"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
-                <li class="nav-item"><a href="/frontend/pages/index.html" class="nav-link"><i class="fas fa-eye"></i><span>Ver Sitio</span></a></li>
+                <li class="nav-item"><a href="admin.html" class="nav-link active"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="../index.html" class="nav-link"><i class="fas fa-eye"></i><span>Ver Sitio</span></a></li>
                 <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link"><i class="fas fa-sign-out-alt"></i><span>Salir</span></a></li>
             </ul>
         </nav>
@@ -91,9 +407,9 @@
         <div class="stat-card"><h3 id="totalUsuarios">0</h3><p>Usuarios</p></div>
     </div>
 
-    <!-- Botón Exportar Excel -->
+    <!-- Botón Exportar -->
     <div class="text-end mb-3">
-        <button class="btn btn-success" onclick="exportarUsuarios()"><i class="fas fa-file-excel"></i> Exportar Usuarios a Excel</button>
+        <button class="btn btn-success" onclick="exportarUsuarios()"><i class="fas fa-file-excel me-2"></i>Exportar Usuarios a Excel</button>
     </div>
 
     <!-- Pestañas -->
@@ -104,30 +420,32 @@
         <button class="tab-btn" data-tab="descartados">🗑️ Descartados</button>
         <button class="tab-btn" data-tab="comics">📚 Cómics</button>
         <button class="tab-btn" data-tab="videos">🎬 Videos</button>
-        <button class="tab-btn" data-tab="slider">🖼️ Slider Carrusel</button>
-        <button class="tab-btn" data-tab="logo">🏷️ Logo Sitio</button>
+        <button class="tab-btn" data-tab="slider">🖼️ Slider</button>
+        <button class="tab-btn" data-tab="logo">🏷️ Logo</button>
         <button class="tab-btn" data-tab="usuarios">👥 Usuarios</button>
     </div>
 
-    <!-- Personajes -->
+    <!-- ==================== PERSONAJES ==================== -->
     <div id="tab-personajes" class="tab-pane active">
         <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
             <h3 style="color: var(--oro);">Gestión de Personajes</h3>
-            <button class="btn btn-primary" onclick="abrirModalPersonaje()">+ Nuevo Personaje</button>
+            <button class="btn btn-primary" onclick="abrirModalPersonaje()"><i class="fas fa-plus me-2"></i>Nuevo Personaje</button>
         </div>
         <div class="table-responsive">
             <table class="data-table">
-                <thead><tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <thead>
+                    <tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr>
+                </thead>
                 <tbody id="personajesTable"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- Arte Oficial -->
+    <!-- ==================== ARTE OFICIAL ==================== -->
     <div id="tab-arte-oficial" class="tab-pane">
         <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
             <h3 style="color: var(--oro);">Arte Oficial</h3>
-            <button class="btn btn-primary" onclick="abrirModalArteOficial()">+ Subir Arte</button>
+            <button class="btn btn-primary" onclick="abrirModalArteOficial()"><i class="fas fa-upload me-2"></i>Subir Arte</button>
         </div>
         <div class="table-responsive">
             <table class="data-table">
@@ -137,11 +455,11 @@
         </div>
     </div>
 
-    <!-- Fanarts -->
+    <!-- ==================== FANARTS ==================== -->
     <div id="tab-fanarts" class="tab-pane">
         <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
             <h3 style="color: var(--oro);">Fanarts de la Comunidad</h3>
-            <button class="btn btn-primary" onclick="abrirModalFanart()">+ Subir Fanart</button>
+            <button class="btn btn-primary" onclick="abrirModalFanart()"><i class="fas fa-upload me-2"></i>Subir Fanart</button>
         </div>
         <div class="table-responsive">
             <table class="data-table">
@@ -151,11 +469,11 @@
         </div>
     </div>
 
-    <!-- Descartados -->
+    <!-- ==================== DESCARTADOS ==================== -->
     <div id="tab-descartados" class="tab-pane">
         <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
             <h3 style="color: var(--oro);">Material Descartado</h3>
-            <button class="btn btn-primary" onclick="abrirModalDescartado()">+ Subir Descartado</button>
+            <button class="btn btn-primary" onclick="abrirModalDescartado()"><i class="fas fa-upload me-2"></i>Subir Descartado</button>
         </div>
         <div class="table-responsive">
             <table class="data-table">
@@ -165,11 +483,11 @@
         </div>
     </div>
 
-    <!-- Cómics -->
+    <!-- ==================== COMICS ==================== -->
     <div id="tab-comics" class="tab-pane">
         <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
             <h3 style="color: var(--oro);">Cómics (Múltiples páginas)</h3>
-            <button class="btn btn-primary" onclick="abrirModalComic()">+ Nuevo Cómic</button>
+            <button class="btn btn-primary" onclick="abrirModalComic()"><i class="fas fa-plus me-2"></i>Nuevo Cómic</button>
         </div>
         <div class="table-responsive">
             <table class="data-table">
@@ -179,11 +497,11 @@
         </div>
     </div>
 
-    <!-- Videos -->
+    <!-- ==================== VIDEOS ==================== -->
     <div id="tab-videos" class="tab-pane">
         <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
             <h3 style="color: var(--oro);">Videos</h3>
-            <button class="btn btn-primary" onclick="abrirModalVideo()">+ Subir Video</button>
+            <button class="btn btn-primary" onclick="abrirModalVideo()"><i class="fas fa-upload me-2"></i>Subir Video</button>
         </div>
         <div class="table-responsive">
             <table class="data-table">
@@ -193,11 +511,11 @@
         </div>
     </div>
 
-    <!-- Slider -->
+    <!-- ==================== SLIDER ==================== -->
     <div id="tab-slider" class="tab-pane">
         <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
             <h3 style="color: var(--oro);">Slider Carrusel</h3>
-            <button class="btn btn-primary" onclick="abrirModalSlider()">+ Subir Imagen</button>
+            <button class="btn btn-primary" onclick="abrirModalSlider()"><i class="fas fa-upload me-2"></i>Subir Imagen</button>
         </div>
         <p class="text-muted mb-3">Las imágenes activas se mostrarán en el carrusel de la página principal.</p>
         <div class="table-responsive">
@@ -208,21 +526,21 @@
         </div>
     </div>
 
-    <!-- Logo -->
+    <!-- ==================== LOGO ==================== -->
     <div id="tab-logo" class="tab-pane">
         <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
             <h3 style="color: var(--oro);">Logo del Sitio</h3>
-            <button class="btn btn-primary" onclick="abrirModalLogo()">+ Subir Logo</button>
+            <button class="btn btn-primary" onclick="abrirModalLogo()"><i class="fas fa-upload me-2"></i>Subir Logo</button>
         </div>
         <p class="text-muted mb-3">Selecciona el logo que se mostrará en el encabezado. Solo uno puede estar activo.</p>
         <div id="logosContainer" class="row g-3"></div>
     </div>
 
-    <!-- Usuarios -->
+    <!-- ==================== USUARIOS ==================== -->
     <div id="tab-usuarios" class="tab-pane">
         <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
             <h3 style="color: var(--oro);">Gestión de Usuarios</h3>
-            <button class="btn btn-primary" onclick="abrirModalUsuario()">+ Nuevo Usuario</button>
+            <button class="btn btn-primary" onclick="abrirModalUsuario()"><i class="fas fa-user-plus me-2"></i>Nuevo Usuario</button>
         </div>
         <div class="table-responsive">
             <table class="data-table">
@@ -233,107 +551,199 @@
     </div>
 </div>
 
-<!-- ========== MODALES ========== -->
+<!-- ==================== MODALES ==================== -->
 
 <!-- Modal Personaje -->
-<div id="modalPersonaje" class="modal"><div class="modal-form"><span class="modal-close" onclick="cerrarModal('modalPersonaje')">&times;</span>
-    <h3>Personaje</h3><input type="hidden" id="personajeId">
-    <label>Nombre</label><input type="text" id="personajeNombre" placeholder="Ej: FREDDY">
-    <label>Categoría</label>
-    <select id="personajeCategoria">
-        <option value="animatronics">ANIMATRONICS</option><option value="toys">TOYS</option>
-        <option value="marionetas">MARIONETAS</option><option value="nightmares">NIGHTMARES</option>
-        <option value="funtimes">FUNTIMES</option><option value="glamrocks">GLAMROCKS</option>
-        <option value="whithered">WHITHERED</option><option value="antagonists">ANTAGONISTS</option>
-        <option value="rockstars">ROCKSTARS</option><option value="docentes">DOCENTES</option>
-    </select>
-    <label>Descripción</label><textarea id="personajeDescripcion" rows="3"></textarea>
-    <label>Imagen FNAFHS Academy</label><input type="file" id="personajeImagen" accept="image/*">
-    <label>Imagen Original FNAF</label><input type="file" id="personajeImagenOriginal" accept="image/*">
-    <div class="modal-buttons"><button class="btn btn-primary" onclick="guardarPersonaje()">Guardar</button><button class="btn btn-danger" onclick="cerrarModal('modalPersonaje')">Cancelar</button></div>
-</div></div>
+<div id="modalPersonaje" class="modal">
+    <div class="modal-form">
+        <span class="modal-close" onclick="cerrarModal('modalPersonaje')">&times;</span>
+        <h3>Personaje</h3>
+        <input type="hidden" id="personajeId">
+        <label>Nombre</label>
+        <input type="text" id="personajeNombre" placeholder="Ej: FREDDY">
+        <label>Categoría</label>
+        <select id="personajeCategoria">
+            <option value="animatronics">ANIMATRONICS</option>
+            <option value="toys">TOYS</option>
+            <option value="marionetas">MARIONETAS</option>
+            <option value="nightmares">NIGHTMARES</option>
+            <option value="funtimes">FUNTIMES</option>
+            <option value="glamrocks">GLAMROCKS</option>
+            <option value="whithered">WHITHERED</option>
+            <option value="antagonists">ANTAGONISTS</option>
+            <option value="rockstars">ROCKSTARS</option>
+            <option value="docentes">DOCENTES</option>
+        </select>
+        <label>Descripción</label>
+        <textarea id="personajeDescripcion" rows="3"></textarea>
+        <label>Imagen FNAFHS Academy</label>
+        <input type="file" id="personajeImagen" accept="image/*">
+        <label>Imagen Original FNAF</label>
+        <input type="file" id="personajeImagenOriginal" accept="image/*">
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="guardarPersonaje()">Guardar</button>
+            <button class="btn btn-danger" onclick="cerrarModal('modalPersonaje')">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Arte Oficial -->
-<div id="modalArteOficial" class="modal"><div class="modal-form"><span class="modal-close" onclick="cerrarModal('modalArteOficial')">&times;</span>
-    <h3>Arte Oficial</h3><input type="hidden" id="arteOficialId">
-    <label>Título</label><input type="text" id="arteOficialTitulo" placeholder="Título del arte">
-    <label>Imagen</label><input type="file" id="arteOficialImagen" accept="image/*">
-    <div class="modal-buttons"><button class="btn btn-primary" onclick="guardarArteOficial()">Guardar</button><button class="btn btn-danger" onclick="cerrarModal('modalArteOficial')">Cancelar</button></div>
-</div></div>
+<div id="modalArteOficial" class="modal">
+    <div class="modal-form">
+        <span class="modal-close" onclick="cerrarModal('modalArteOficial')">&times;</span>
+        <h3>Arte Oficial</h3>
+        <input type="hidden" id="arteOficialId">
+        <label>Título</label>
+        <input type="text" id="arteOficialTitulo" placeholder="Título del arte">
+        <label>Imagen</label>
+        <input type="file" id="arteOficialImagen" accept="image/*">
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="guardarArteOficial()">Guardar</button>
+            <button class="btn btn-danger" onclick="cerrarModal('modalArteOficial')">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Fanart -->
-<div id="modalFanart" class="modal"><div class="modal-form"><span class="modal-close" onclick="cerrarModal('modalFanart')">&times;</span>
-    <h3>Fanart</h3><input type="hidden" id="fanartId">
-    <label>Título</label><input type="text" id="fanartTitulo" placeholder="Título del fanart">
-    <label>Autor</label><input type="text" id="fanartAutor" placeholder="Nombre del autor">
-    <label>Imagen</label><input type="file" id="fanartImagen" accept="image/*">
-    <div class="modal-buttons"><button class="btn btn-primary" onclick="guardarFanart()">Guardar</button><button class="btn btn-danger" onclick="cerrarModal('modalFanart')">Cancelar</button></div>
-</div></div>
+<div id="modalFanart" class="modal">
+    <div class="modal-form">
+        <span class="modal-close" onclick="cerrarModal('modalFanart')">&times;</span>
+        <h3>Fanart</h3>
+        <input type="hidden" id="fanartId">
+        <label>Título</label>
+        <input type="text" id="fanartTitulo" placeholder="Título del fanart">
+        <label>Autor</label>
+        <input type="text" id="fanartAutor" placeholder="Nombre del autor">
+        <label>Imagen</label>
+        <input type="file" id="fanartImagen" accept="image/*">
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="guardarFanart()">Guardar</button>
+            <button class="btn btn-danger" onclick="cerrarModal('modalFanart')">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Descartado -->
-<div id="modalDescartado" class="modal"><div class="modal-form"><span class="modal-close" onclick="cerrarModal('modalDescartado')">&times;</span>
-    <h3>Material Descartado</h3><input type="hidden" id="descartadoId">
-    <label>Descripción</label><textarea id="descartadoDescripcion" rows="3" placeholder="¿Por qué fue descartado?"></textarea>
-    <label>Imagen</label><input type="file" id="descartadoImagen" accept="image/*">
-    <div class="modal-buttons"><button class="btn btn-primary" onclick="guardarDescartado()">Guardar</button><button class="btn btn-danger" onclick="cerrarModal('modalDescartado')">Cancelar</button></div>
-</div></div>
+<div id="modalDescartado" class="modal">
+    <div class="modal-form">
+        <span class="modal-close" onclick="cerrarModal('modalDescartado')">&times;</span>
+        <h3>Material Descartado</h3>
+        <input type="hidden" id="descartadoId">
+        <label>Descripción</label>
+        <textarea id="descartadoDescripcion" rows="3" placeholder="¿Por qué fue descartado?"></textarea>
+        <label>Imagen</label>
+        <input type="file" id="descartadoImagen" accept="image/*">
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="guardarDescartado()">Guardar</button>
+            <button class="btn btn-danger" onclick="cerrarModal('modalDescartado')">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Comic -->
-<div id="modalComic" class="modal"><div class="modal-form"><span class="modal-close" onclick="cerrarModal('modalComic')">&times;</span>
-    <h3>Cómic</h3><input type="hidden" id="comicId">
-    <label>Título del Cómic</label><input type="text" id="comicTitulo" placeholder="Título">
-    <label>Páginas (subir múltiples imágenes en orden)</label><input type="file" id="comicPaginas" accept="image/*" multiple>
-    <small class="text-muted">Selecciona todas las páginas del cómic en orden</small>
-    <div class="modal-buttons"><button class="btn btn-primary" onclick="guardarComic()">Guardar Cómic</button><button class="btn btn-danger" onclick="cerrarModal('modalComic')">Cancelar</button></div>
-</div></div>
+<div id="modalComic" class="modal">
+    <div class="modal-form">
+        <span class="modal-close" onclick="cerrarModal('modalComic')">&times;</span>
+        <h3>Cómic</h3>
+        <input type="hidden" id="comicId">
+        <label>Título del Cómic</label>
+        <input type="text" id="comicTitulo" placeholder="Título">
+        <label>Páginas (subir múltiples imágenes en orden)</label>
+        <input type="file" id="comicPaginas" accept="image/*" multiple>
+        <small class="text-muted">Selecciona todas las páginas del cómic en orden</small>
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="guardarComic()">Guardar Cómic</button>
+            <button class="btn btn-danger" onclick="cerrarModal('modalComic')">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Video -->
-<div id="modalVideo" class="modal"><div class="modal-form"><span class="modal-close" onclick="cerrarModal('modalVideo')">&times;</span>
-    <h3>Video</h3><input type="hidden" id="videoId">
-    <label>Título del Video</label><input type="text" id="videoTitulo" placeholder="Título">
-    <label>Archivo de Video</label><input type="file" id="videoArchivo" accept="video/*">
-    <div class="modal-buttons"><button class="btn btn-primary" onclick="guardarVideo()">Guardar Video</button><button class="btn btn-danger" onclick="cerrarModal('modalVideo')">Cancelar</button></div>
-</div></div>
+<div id="modalVideo" class="modal">
+    <div class="modal-form">
+        <span class="modal-close" onclick="cerrarModal('modalVideo')">&times;</span>
+        <h3>Video</h3>
+        <input type="hidden" id="videoId">
+        <label>Título del Video</label>
+        <input type="text" id="videoTitulo" placeholder="Título">
+        <label>Archivo de Video</label>
+        <input type="file" id="videoArchivo" accept="video/*">
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="guardarVideo()">Guardar Video</button>
+            <button class="btn btn-danger" onclick="cerrarModal('modalVideo')">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Slider -->
-<div id="modalSlider" class="modal"><div class="modal-form"><span class="modal-close" onclick="cerrarModal('modalSlider')">&times;</span>
-    <h3>Imagen para Slider</h3><label>Imagen</label><input type="file" id="sliderImagen" accept="image/*">
-    <div class="modal-buttons"><button class="btn btn-primary" onclick="subirImagenSlider()">Subir</button><button class="btn btn-danger" onclick="cerrarModal('modalSlider')">Cancelar</button></div>
-</div></div>
+<div id="modalSlider" class="modal">
+    <div class="modal-form">
+        <span class="modal-close" onclick="cerrarModal('modalSlider')">&times;</span>
+        <h3>Imagen para Slider</h3>
+        <label>Imagen</label>
+        <input type="file" id="sliderImagen" accept="image/*">
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="subirImagenSlider()">Subir</button>
+            <button class="btn btn-danger" onclick="cerrarModal('modalSlider')">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Logo -->
-<div id="modalLogo" class="modal"><div class="modal-form"><span class="modal-close" onclick="cerrarModal('modalLogo')">&times;</span>
-    <h3>Subir Logo</h3><label>Imagen del Logo</label><input type="file" id="logoImagen" accept="image/*">
-    <div class="modal-buttons"><button class="btn btn-primary" onclick="subirLogo()">Subir Logo</button><button class="btn btn-danger" onclick="cerrarModal('modalLogo')">Cancelar</button></div>
-</div></div>
+<div id="modalLogo" class="modal">
+    <div class="modal-form">
+        <span class="modal-close" onclick="cerrarModal('modalLogo')">&times;</span>
+        <h3>Subir Logo</h3>
+        <label>Imagen del Logo</label>
+        <input type="file" id="logoImagen" accept="image/*">
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="subirLogo()">Subir Logo</button>
+            <button class="btn btn-danger" onclick="cerrarModal('modalLogo')">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Usuario -->
-<div id="modalUsuario" class="modal"><div class="modal-form"><span class="modal-close" onclick="cerrarModal('modalUsuario')">&times;</span>
-    <h3>Editar Usuario</h3><input type="hidden" id="usuarioId">
-    <label>Usuario</label><input type="text" id="usuarioUsername" readonly style="background:#1a1a3e; cursor:not-allowed;">
-    <label>Contraseña (dejar vacío para no cambiar)</label><input type="password" id="usuarioPassword">
-    <label>Nombre Completo</label><input type="text" id="usuarioNombreCompleto">
-    <label>Email</label><input type="email" id="usuarioEmail">
-    <label>Teléfono</label><input type="text" id="usuarioTelefono">
-    <label>Dirección</label><textarea id="usuarioDireccion" rows="2"></textarea>
-    <label>Rol</label>
-    <select id="usuarioRol">
-        <option value="USER">Usuario Normal</option>
-        <option value="SUBADMIN">Sub Administrador</option>
-        <option value="ADMIN">Administrador</option>
-    </select>
-    <label>Estado</label>
-    <select id="usuarioEstado">
-        <option value="1">Activo</option>
-        <option value="0">Inactivo</option>
-    </select>
-    <div class="modal-buttons"><button class="btn btn-primary" onclick="actualizarUsuario()">Actualizar</button><button class="btn btn-danger" onclick="cerrarModal('modalUsuario')">Cancelar</button></div>
-</div></div>
+<div id="modalUsuario" class="modal">
+    <div class="modal-form">
+        <span class="modal-close" onclick="cerrarModal('modalUsuario')">&times;</span>
+        <h3>Editar Usuario</h3>
+        <input type="hidden" id="usuarioId">
+        <label>Usuario</label>
+        <input type="text" id="usuarioUsername" readonly style="background:#1a1a3e;">
+        <label>Contraseña (dejar vacío para no cambiar)</label>
+        <input type="password" id="usuarioPassword">
+        <label>Nombre Completo</label>
+        <input type="text" id="usuarioNombreCompleto">
+        <label>Email</label>
+        <input type="email" id="usuarioEmail">
+        <label>Teléfono</label>
+        <input type="text" id="usuarioTelefono">
+        <label>Dirección</label>
+        <textarea id="usuarioDireccion" rows="2"></textarea>
+        <label>Rol</label>
+        <select id="usuarioRol">
+            <option value="USER">Usuario Normal</option>
+            <option value="SUBADMIN">Sub Administrador</option>
+            <option value="ADMIN">Administrador</option>
+        </select>
+        <label>Estado</label>
+        <select id="usuarioEstado">
+            <option value="1">Activo</option>
+            <option value="0">Inactivo</option>
+        </select>
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="actualizarUsuario()">Actualizar</button>
+            <button class="btn btn-danger" onclick="cerrarModal('modalUsuario')">Cancelar</button>
+        </div>
+    </div>
+</div>
 
-<script src="/frontend/js/dashboard.js"></script>
 <script>
+    // ==================== VARIABLES GLOBALES ====================
     let currentTab = 'personajes';
 
+    // ==================== PESTAÑAS ====================
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -356,19 +766,20 @@
         if (currentTab === 'logo') cargarLogos();
         if (currentTab === 'usuarios') cargarUsuarios();
         cargarEstadisticas();
-        cargarLogoActivoHeader();
     }
 
+    // ==================== ESTADÍSTICAS ====================
     async function cargarEstadisticas() {
         try {
-            let p = await fetch(window.API_URL+'/api/personajes').then(r=>r.json());
-            let ao = await fetch(window.API_URL+'/api/arte/tipo/arte-oficial').then(r=>r.json());
-            let fa = await fetch(window.API_URL+'/api/arte/tipo/fanart').then(r=>r.json());
-            let de = await fetch(window.API_URL+'/api/arte/tipo/descartado').then(r=>r.json());
-            let co = await fetch(window.API_URL+'/api/arte/tipo/comic').then(r=>r.json());
-            let vi = await fetch(window.API_URL+'/api/videos').then(r=>r.json());
-            let sl = await fetch(window.API_URL+'/api/slider').then(r=>r.json());
-            let us = await fetch(window.API_URL+'/api/usuarios').then(r=>r.json());
+            let p = await fetch(window.API_URL + '/api/personajes').then(r => r.json());
+            let ao = await fetch(window.API_URL + '/api/arte/tipo/arte-oficial').then(r => r.json());
+            let fa = await fetch(window.API_URL + '/api/arte/tipo/fanart').then(r => r.json());
+            let de = await fetch(window.API_URL + '/api/arte/tipo/descartado').then(r => r.json());
+            let co = await fetch(window.API_URL + '/api/arte/tipo/comic').then(r => r.json());
+            let vi = await fetch(window.API_URL + '/api/videos').then(r => r.json());
+            let sl = await fetch(window.API_URL + '/api/slider').then(r => r.json());
+            let us = await fetch(window.API_URL + '/api/usuarios').then(r => r.json());
+            
             document.getElementById('totalPersonajes').innerText = p.length;
             document.getElementById('totalArteOficial').innerText = ao.length;
             document.getElementById('totalFanarts').innerText = fa.length;
@@ -377,48 +788,73 @@
             document.getElementById('totalVideos').innerText = vi.length;
             document.getElementById('totalSlider').innerText = sl.length;
             document.getElementById('totalUsuarios').innerText = us.length;
-        } catch(e){ console.error(e); }
-    }
-
-    function cerrarModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-    window.onclick = function(e) { if(e.target.classList.contains('modal')) e.target.style.display = 'none'; }
-
-    // ========== PERSONAJES ==========
-    async function cargarPersonajes() {
-        let res = await fetch(window.API_URL+'/api/personajes');
-        let data = await res.json();
-        let html = '';
-        if(data.length === 0) { html = '<tr><td colspan="5" style="text-align:center;">No hay personajes</td></tr>'; }
-        else {
-            data.forEach(p => {
-                html += `<tr><td>${p.id}</td><td>${p.nombre}</td><td>${p.categoria||'-'}</td><td><span class="badge ${p.estado==1?'bg-success':'bg-danger'}">${p.estado==1?'Activo':'Inactivo'}</span></td>
-                <td><button class="btn btn-warning btn-sm" onclick="editarPersonaje(${p.id})">Editar</button>
-                <button class="btn btn-danger btn-sm" onclick="eliminarPersonaje(${p.id})">Eliminar</button>
-                <button class="btn btn-info btn-sm" onclick="toggleEstadoPersonaje(${p.id},${p.estado==1?0:1})">${p.estado==1?'Desactivar':'Activar'}</button></td></tr>`;
-            });
+        } catch (e) {
+            console.error('Error cargando estadísticas:', e);
         }
-        document.getElementById('personajesTable').innerHTML = html;
     }
 
-    function abrirModalPersonaje(id=null) {
+    // ==================== UTILIDADES ====================
+    function cerrarModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+    
+    window.onclick = function(e) {
+        if (e.target.classList && e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
+        }
+    }
+
+    // ==================== PERSONAJES ====================
+    async function cargarPersonajes() {
+        try {
+            let res = await fetch(window.API_URL + '/api/personajes');
+            let data = await res.json();
+            let html = '';
+            if (data.length === 0) {
+                html = '<tr><td colspan="5" class="text-center">No hay personajes</td></tr>';
+            } else {
+                data.forEach(p => {
+                    html += `<tr>
+                        <td>${p.id}</td>
+                        <td>${p.nombre}</td>
+                        <td>${p.categoria || '-'}</td>
+                        <td><span class="badge ${p.estado == 1 ? 'bg-success' : 'bg-danger'}">${p.estado == 1 ? 'Activo' : 'Inactivo'}</span></td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editarPersonaje(${p.id})"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarPersonaje(${p.id})"><i class="fas fa-trash"></i> Eliminar</button>
+                            <button class="btn btn-info btn-sm" onclick="toggleEstadoPersonaje(${p.id}, ${p.estado == 1 ? 0 : 1})">${p.estado == 1 ? 'Desactivar' : 'Activar'}</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('personajesTable').innerHTML = html;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function abrirModalPersonaje() {
         document.getElementById('personajeId').value = '';
         document.getElementById('personajeNombre').value = '';
         document.getElementById('personajeCategoria').value = 'animatronics';
         document.getElementById('personajeDescripcion').value = '';
         document.getElementById('personajeImagen').value = '';
         document.getElementById('personajeImagenOriginal').value = '';
-        if(id) editarPersonaje(id);
-        else document.getElementById('modalPersonaje').style.display = 'flex';
+        document.getElementById('modalPersonaje').style.display = 'flex';
     }
 
     async function editarPersonaje(id) {
-        let res = await fetch(window.API_URL+`/api/personajes/${id}`);
-        let p = await res.json();
-        document.getElementById('personajeId').value = p.id;
-        document.getElementById('personajeNombre').value = p.nombre;
-        document.getElementById('personajeCategoria').value = p.categoria;
-        document.getElementById('personajeDescripcion').value = p.descripcion||'';
-        document.getElementById('modalPersonaje').style.display = 'flex';
+        try {
+            let res = await fetch(window.API_URL + `/api/personajes/${id}`);
+            let p = await res.json();
+            document.getElementById('personajeId').value = p.id;
+            document.getElementById('personajeNombre').value = p.nombre;
+            document.getElementById('personajeCategoria').value = p.categoria;
+            document.getElementById('personajeDescripcion').value = p.descripcion || '';
+            document.getElementById('modalPersonaje').style.display = 'flex';
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async function guardarPersonaje() {
@@ -427,40 +863,67 @@
         form.append('nombre', document.getElementById('personajeNombre').value);
         form.append('categoria', document.getElementById('personajeCategoria').value);
         form.append('descripcion', document.getElementById('personajeDescripcion').value);
+        
         let img = document.getElementById('personajeImagen').files[0];
-        if(img) form.append('imagenFile', img);
+        if (img) form.append('imagenFile', img);
+        
         let imgOri = document.getElementById('personajeImagenOriginal').files[0];
-        if(imgOri) form.append('imagenOriginalFile', imgOri);
-        let url = id ? window.API_URL+`/api/personajes/${id}` : window.API_URL+'/api/personajes';
+        if (imgOri) form.append('imagenOriginalFile', imgOri);
+        
+        let url = id ? window.API_URL + `/api/personajes/${id}` : window.API_URL + '/api/personajes';
         let method = id ? 'PUT' : 'POST';
-        Swal.fire({title:'Guardando...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
-        let res = await fetch(url, {method, body:form});
-        if(res.ok) { Swal.fire('Éxito','Personaje guardado','success'); cerrarModal('modalPersonaje'); cargarPersonajes(); cargarEstadisticas(); }
-        else Swal.fire('Error','Error al guardar','error');
+        
+        Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        
+        let res = await fetch(url, { method, body: form });
+        
+        if (res.ok) {
+            Swal.fire('Éxito', 'Personaje guardado', 'success');
+            cerrarModal('modalPersonaje');
+            cargarPersonajes();
+            cargarEstadisticas();
+        } else {
+            Swal.fire('Error', 'Error al guardar', 'error');
+        }
     }
 
     async function eliminarPersonaje(id) {
-        let confirm = await Swal.fire({title:'¿Eliminar?',icon:'warning',showCancelButton:true});
-        if(confirm.isConfirmed) { await fetch(window.API_URL+`/api/personajes/${id}`,{method:'DELETE'}); cargarPersonajes(); cargarEstadisticas(); }
+        let confirm = await Swal.fire({ title: '¿Eliminar?', icon: 'warning', showCancelButton: true });
+        if (confirm.isConfirmed) {
+            await fetch(window.API_URL + `/api/personajes/${id}`, { method: 'DELETE' });
+            cargarPersonajes();
+            cargarEstadisticas();
+            Swal.fire('Eliminado', 'Personaje eliminado', 'success');
+        }
     }
 
     async function toggleEstadoPersonaje(id, estado) {
-        await fetch(window.API_URL+`/api/personajes/${id}/estado?estado=${estado}`,{method:'PUT'});
+        await fetch(window.API_URL + `/api/personajes/${id}/estado?estado=${estado}`, { method: 'PUT' });
         cargarPersonajes();
     }
 
-    // ========== ARTE OFICIAL ==========
+    // ==================== ARTE OFICIAL ====================
     async function cargarArteOficial() {
-        let res = await fetch(window.API_URL+'/api/arte/tipo/arte-oficial');
-        let data = await res.json();
-        let html = '';
-        if(data.length === 0) { html = '<tr><td colspan="4" style="text-align:center;">No hay imágenes de Arte Oficial</td></tr>'; }
-        else {
-            data.forEach(a => {
-                html += `<tr><td>${a.id}</td><td><img src="${a.imagenUrl}" class="preview-img" onerror="this.src='https://via.placeholder.com/50'"></td><td>${a.titulo||'-'}</td><td><button class="btn btn-danger btn-sm" onclick="eliminarArte(${a.id},'arte-oficial')">Eliminar</button></td></tr>`;
-            });
+        try {
+            let res = await fetch(window.API_URL + '/api/arte/tipo/arte-oficial');
+            let data = await res.json();
+            let html = '';
+            if (data.length === 0) {
+                html = '<tr><td colspan="4" class="text-center">No hay imágenes de Arte Oficial</td></tr>';
+            } else {
+                data.forEach(a => {
+                    html += `<tr>
+                        <td>${a.id}</td>
+                        <td><img src="${a.imagenUrl}" class="preview-img" onerror="this.src='https://via.placeholder.com/50'"></td>
+                        <td>${a.titulo || '-'}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="eliminarArte(${a.id}, 'arte-oficial')"><i class="fas fa-trash"></i> Eliminar</button></td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('arteOficialTable').innerHTML = html;
+        } catch (e) {
+            console.error(e);
         }
-        document.getElementById('arteOficialTable').innerHTML = html;
     }
 
     function abrirModalArteOficial() {
@@ -474,27 +937,51 @@
         let form = new FormData();
         form.append('titulo', document.getElementById('arteOficialTitulo').value);
         form.append('tipo', 'arte-oficial');
+        
         let img = document.getElementById('arteOficialImagen').files[0];
-        if(!img) { Swal.fire('Error','Selecciona una imagen','error'); return; }
+        if (!img) {
+            Swal.fire('Error', 'Selecciona una imagen', 'error');
+            return;
+        }
         form.append('imagenFile', img);
-        Swal.fire({title:'Guardando...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
-        let res = await fetch(window.API_URL+'/api/arte', {method:'POST', body:form});
-        if(res.ok) { Swal.fire('Éxito','Arte guardado','success'); cerrarModal('modalArteOficial'); cargarArteOficial(); cargarEstadisticas(); }
-        else Swal.fire('Error','Error al guardar','error');
+        
+        Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        
+        let res = await fetch(window.API_URL + '/api/arte', { method: 'POST', body: form });
+        
+        if (res.ok) {
+            Swal.fire('Éxito', 'Arte guardado', 'success');
+            cerrarModal('modalArteOficial');
+            cargarArteOficial();
+            cargarEstadisticas();
+        } else {
+            Swal.fire('Error', 'Error al guardar', 'error');
+        }
     }
 
-    // ========== FANARTS ==========
+    // ==================== FANARTS ====================
     async function cargarFanarts() {
-        let res = await fetch(window.API_URL+'/api/arte/tipo/fanart');
-        let data = await res.json();
-        let html = '';
-        if(data.length === 0) { html = '<tr><td colspan="5" style="text-align:center;">No hay fanarts</td></tr>'; }
-        else {
-            data.forEach(a => {
-                html += `<tr><td>${a.id}</td><td><img src="${a.imagenUrl}" class="preview-img" onerror="this.src='https://via.placeholder.com/50'"></td><td>${a.titulo||'-'}</td><td>${a.autor||'-'}</td><td><button class="btn btn-danger btn-sm" onclick="eliminarArte(${a.id},'fanart')">Eliminar</button></td></tr>`;
-            });
+        try {
+            let res = await fetch(window.API_URL + '/api/arte/tipo/fanart');
+            let data = await res.json();
+            let html = '';
+            if (data.length === 0) {
+                html = '<tr><td colspan="5" class="text-center">No hay fanarts</td></tr>';
+            } else {
+                data.forEach(a => {
+                    html += `<tr>
+                        <td>${a.id}</td>
+                        <td><img src="${a.imagenUrl}" class="preview-img" onerror="this.src='https://via.placeholder.com/50'"></td>
+                        <td>${a.titulo || '-'}</td>
+                        <td>${a.autor || '-'}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="eliminarArte(${a.id}, 'fanart')"><i class="fas fa-trash"></i> Eliminar</button></td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('fanartsTable').innerHTML = html;
+        } catch (e) {
+            console.error(e);
         }
-        document.getElementById('fanartsTable').innerHTML = html;
     }
 
     function abrirModalFanart() {
@@ -509,27 +996,50 @@
         let form = new FormData();
         form.append('titulo', document.getElementById('fanartTitulo').value);
         form.append('tipo', 'fanart');
+        
         let img = document.getElementById('fanartImagen').files[0];
-        if(!img) { Swal.fire('Error','Selecciona una imagen','error'); return; }
+        if (!img) {
+            Swal.fire('Error', 'Selecciona una imagen', 'error');
+            return;
+        }
         form.append('imagenFile', img);
-        Swal.fire({title:'Guardando...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
-        let res = await fetch(window.API_URL+'/api/arte', {method:'POST', body:form});
-        if(res.ok) { Swal.fire('Éxito','Fanart guardado','success'); cerrarModal('modalFanart'); cargarFanarts(); cargarEstadisticas(); }
-        else Swal.fire('Error','Error al guardar','error');
+        
+        Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        
+        let res = await fetch(window.API_URL + '/api/arte', { method: 'POST', body: form });
+        
+        if (res.ok) {
+            Swal.fire('Éxito', 'Fanart guardado', 'success');
+            cerrarModal('modalFanart');
+            cargarFanarts();
+            cargarEstadisticas();
+        } else {
+            Swal.fire('Error', 'Error al guardar', 'error');
+        }
     }
 
-    // ========== DESCARTADOS ==========
+    // ==================== DESCARTADOS ====================
     async function cargarDescartados() {
-        let res = await fetch(window.API_URL+'/api/arte/tipo/descartado');
-        let data = await res.json();
-        let html = '';
-        if(data.length === 0) { html = '<tr><td colspan="4" style="text-align:center;">No hay material descartado</td></tr>'; }
-        else {
-            data.forEach(a => {
-                html += `<tr><td>${a.id}</td><td><img src="${a.imagenUrl}" class="preview-img" onerror="this.src='https://via.placeholder.com/50'"></td><td>${a.titulo||'-'}</td><td><button class="btn btn-danger btn-sm" onclick="eliminarArte(${a.id},'descartado')">Eliminar</button></td></tr>`;
-            });
+        try {
+            let res = await fetch(window.API_URL + '/api/arte/tipo/descartado');
+            let data = await res.json();
+            let html = '';
+            if (data.length === 0) {
+                html = '<tr><td colspan="4" class="text-center">No hay material descartado</td></tr>';
+            } else {
+                data.forEach(a => {
+                    html += `<tr>
+                        <td>${a.id}</td>
+                        <td><img src="${a.imagenUrl}" class="preview-img" onerror="this.src='https://via.placeholder.com/50'"></td>
+                        <td>${a.titulo || '-'}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="eliminarArte(${a.id}, 'descartado')"><i class="fas fa-trash"></i> Eliminar</button></td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('descartadosTable').innerHTML = html;
+        } catch (e) {
+            console.error(e);
         }
-        document.getElementById('descartadosTable').innerHTML = html;
     }
 
     function abrirModalDescartado() {
@@ -543,29 +1053,56 @@
         let form = new FormData();
         form.append('titulo', document.getElementById('descartadoDescripcion').value);
         form.append('tipo', 'descartado');
+        
         let img = document.getElementById('descartadoImagen').files[0];
-        if(!img) { Swal.fire('Error','Selecciona una imagen','error'); return; }
+        if (!img) {
+            Swal.fire('Error', 'Selecciona una imagen', 'error');
+            return;
+        }
         form.append('imagenFile', img);
-        Swal.fire({title:'Guardando...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
-        let res = await fetch(window.API_URL+'/api/arte', {method:'POST', body:form});
-        if(res.ok) { Swal.fire('Éxito','Descartado guardado','success'); cerrarModal('modalDescartado'); cargarDescartados(); cargarEstadisticas(); }
-        else Swal.fire('Error','Error al guardar','error');
+        
+        Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        
+        let res = await fetch(window.API_URL + '/api/arte', { method: 'POST', body: form });
+        
+        if (res.ok) {
+            Swal.fire('Éxito', 'Descartado guardado', 'success');
+            cerrarModal('modalDescartado');
+            cargarDescartados();
+            cargarEstadisticas();
+        } else {
+            Swal.fire('Error', 'Error al guardar', 'error');
+        }
     }
 
-    // ========== COMICS ==========
+    // ==================== COMICS ====================
     async function cargarComics() {
-        let res = await fetch(window.API_URL+'/api/arte/tipo/comic');
-        let data = await res.json();
-        let comicsMap = new Map();
-        data.forEach(c => { if(!comicsMap.has(c.comicId)) comicsMap.set(c.comicId, []); comicsMap.get(c.comicId).push(c); });
-        let html = '';
-        if(comicsMap.size === 0) { html = '<tr><td colspan="4" style="text-align:center;">No hay cómics</td></tr>'; }
-        else {
-            for(let [comicId, pages] of comicsMap) {
-                html += `<tr><td>${comicId}</td><td>${pages[0]?.titulo||'Sin título'}</td><td>${pages.length} páginas</td><td><button class="btn btn-danger btn-sm" onclick="eliminarComic('${comicId}')">Eliminar Cómic</button></td></tr>`;
+        try {
+            let res = await fetch(window.API_URL + '/api/arte/tipo/comic');
+            let data = await res.json();
+            let comicsMap = new Map();
+            data.forEach(c => {
+                if (!comicsMap.has(c.comicId)) comicsMap.set(c.comicId, []);
+                comicsMap.get(c.comicId).push(c);
+            });
+            
+            let html = '';
+            if (comicsMap.size === 0) {
+                html = '<tr><td colspan="4" class="text-center">No hay cómics</td></tr>';
+            } else {
+                for (let [comicId, pages] of comicsMap) {
+                    html += `<tr>
+                        <td>${comicId}</td>
+                        <td>${pages[0]?.titulo || 'Sin título'}</td>
+                        <td>${pages.length} páginas</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="eliminarComic('${comicId}')"><i class="fas fa-trash"></i> Eliminar Cómic</button></td>
+                    </tr>`;
+                }
             }
+            document.getElementById('comicsTable').innerHTML = html;
+        } catch (e) {
+            console.error(e);
         }
-        document.getElementById('comicsTable').innerHTML = html;
     }
 
     function abrirModalComic() {
@@ -576,50 +1113,69 @@
     }
 
     async function guardarComic() {
-        let comicId = document.getElementById('comicId').value || 'comic_' + Date.now();
+        let comicId = 'comic_' + Date.now();
         let titulo = document.getElementById('comicTitulo').value;
         let paginas = document.getElementById('comicPaginas').files;
-        if(paginas.length === 0) { Swal.fire('Error','Selecciona al menos una página','error'); return; }
-        Swal.fire({title:'Guardando cómic...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
-        for(let i=0; i<paginas.length; i++) {
+        
+        if (paginas.length === 0) {
+            Swal.fire('Error', 'Selecciona al menos una página', 'error');
+            return;
+        }
+        
+        Swal.fire({ title: 'Guardando cómic...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        
+        for (let i = 0; i < paginas.length; i++) {
             let form = new FormData();
             form.append('titulo', titulo);
             form.append('tipo', 'comic');
             form.append('comicId', comicId);
             form.append('totalPaginas', paginas.length);
             form.append('imagenFile', paginas[i]);
-            await fetch(window.API_URL+'/api/arte', {method:'POST', body:form});
+            await fetch(window.API_URL + '/api/arte', { method: 'POST', body: form });
         }
-        Swal.fire('Éxito','Cómic guardado','success');
+        
+        Swal.fire('Éxito', 'Cómic guardado', 'success');
         cerrarModal('modalComic');
         cargarComics();
         cargarEstadisticas();
     }
 
     async function eliminarComic(comicId) {
-        let confirm = await Swal.fire({title:'¿Eliminar cómic completo?',icon:'warning',showCancelButton:true});
-        if(confirm.isConfirmed) {
-            let res = await fetch(window.API_URL+`/api/arte/comic/${comicId}`);
+        let confirm = await Swal.fire({ title: '¿Eliminar cómic completo?', icon: 'warning', showCancelButton: true });
+        if (confirm.isConfirmed) {
+            let res = await fetch(window.API_URL + `/api/arte/comic/${comicId}`);
             let pages = await res.json();
-            for(let p of pages) await fetch(window.API_URL+`/api/arte/${p.id}`,{method:'DELETE'});
+            for (let p of pages) {
+                await fetch(window.API_URL + `/api/arte/${p.id}`, { method: 'DELETE' });
+            }
             cargarComics();
             cargarEstadisticas();
-            Swal.fire('Eliminado','Cómic eliminado','success');
+            Swal.fire('Eliminado', 'Cómic eliminado', 'success');
         }
     }
 
-    // ========== VIDEOS ==========
+    // ==================== VIDEOS ====================
     async function cargarVideos() {
-        let res = await fetch(window.API_URL+'/api/videos');
-        let data = await res.json();
-        let html = '';
-        if(data.length === 0) { html = '<tr><td colspan="4" style="text-align:center;">No hay videos</td></tr>'; }
-        else {
-            data.forEach(v => {
-                html += `<tr><td>${v.id}</td><td>${v.titulo}</td><td><video width="100" height="60" controls><source src="${v.videoUrl}" type="video/mp4"></video></td><td><button class="btn btn-danger btn-sm" onclick="eliminarVideo(${v.id})">Eliminar</button></td></tr>`;
-            });
+        try {
+            let res = await fetch(window.API_URL + '/api/videos');
+            let data = await res.json();
+            let html = '';
+            if (data.length === 0) {
+                html = '<tr><td colspan="4" class="text-center">No hay videos</td></tr>';
+            } else {
+                data.forEach(v => {
+                    html += `<tr>
+                        <td>${v.id}</td>
+                        <td>${v.titulo}</td>
+                        <td><video width="100" height="60" controls class="video-preview"><source src="${v.videoUrl}" type="video/mp4"></video></td>
+                        <td><button class="btn btn-danger btn-sm" onclick="eliminarVideo(${v.id})"><i class="fas fa-trash"></i> Eliminar</button></td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('videosTable').innerHTML = html;
+        } catch (e) {
+            console.error(e);
         }
-        document.getElementById('videosTable').innerHTML = html;
     }
 
     function abrirModalVideo() {
@@ -632,34 +1188,63 @@
     async function guardarVideo() {
         let form = new FormData();
         form.append('titulo', document.getElementById('videoTitulo').value);
+        
         let video = document.getElementById('videoArchivo').files[0];
-        if(!video) { Swal.fire('Error','Selecciona un video','error'); return; }
+        if (!video) {
+            Swal.fire('Error', 'Selecciona un video', 'error');
+            return;
+        }
         form.append('videoFile', video);
-        Swal.fire({title:'Guardando...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
-        let res = await fetch(window.API_URL+'/api/videos', {method:'POST', body:form});
-        if(res.ok) { Swal.fire('Éxito','Video guardado','success'); cerrarModal('modalVideo'); cargarVideos(); cargarEstadisticas(); }
-        else Swal.fire('Error','Error al guardar','error');
+        
+        Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        
+        let res = await fetch(window.API_URL + '/api/videos', { method: 'POST', body: form });
+        
+        if (res.ok) {
+            Swal.fire('Éxito', 'Video guardado', 'success');
+            cerrarModal('modalVideo');
+            cargarVideos();
+            cargarEstadisticas();
+        } else {
+            Swal.fire('Error', 'Error al guardar', 'error');
+        }
     }
 
     async function eliminarVideo(id) {
-        let confirm = await Swal.fire({title:'¿Eliminar video?',icon:'warning',showCancelButton:true});
-        if(confirm.isConfirmed) { await fetch(window.API_URL+`/api/videos/${id}`,{method:'DELETE'}); cargarVideos(); cargarEstadisticas(); }
+        let confirm = await Swal.fire({ title: '¿Eliminar video?', icon: 'warning', showCancelButton: true });
+        if (confirm.isConfirmed) {
+            await fetch(window.API_URL + `/api/videos/${id}`, { method: 'DELETE' });
+            cargarVideos();
+            cargarEstadisticas();
+            Swal.fire('Eliminado', 'Video eliminado', 'success');
+        }
     }
 
-    // ========== SLIDER ==========
+    // ==================== SLIDER ====================
     async function cargarSlider() {
-        let res = await fetch(window.API_URL+'/api/slider');
-        let data = await res.json();
-        let html = '';
-        if(data.length === 0) { html = '<tr><td colspan="4" style="text-align:center;">No hay imágenes en el slider</td></tr>'; }
-        else {
-            data.forEach(s => {
-                html += `<tr><td>${s.id}</td><td><img src="${s.imagenUrl}" width="80" height="50" style="object-fit:cover; border-radius:8px;" onerror="this.src='https://via.placeholder.com/80x50'"></td><td><span class="badge ${s.activo?'bg-success':'bg-secondary'}">${s.activo?'Activo':'Inactivo'}</span></td>
-                <td><button class="btn btn-warning btn-sm" onclick="toggleSlider(${s.id}, ${!s.activo})">${s.activo?'Desactivar':'Activar'}</button>
-                <button class="btn btn-danger btn-sm" onclick="eliminarSlider(${s.id})">Eliminar</button></td></tr>`;
-            });
+        try {
+            let res = await fetch(window.API_URL + '/api/slider');
+            let data = await res.json();
+            let html = '';
+            if (data.length === 0) {
+                html = '<tr><td colspan="4" class="text-center">No hay imágenes en el slider</td></tr>';
+            } else {
+                data.forEach(s => {
+                    html += `<tr>
+                        <td>${s.id}</td>
+                        <td><img src="${s.imagenUrl}" width="80" height="50" style="object-fit:cover; border-radius:8px;"></td>
+                        <td><span class="badge ${s.activo ? 'bg-success' : 'bg-secondary'}">${s.activo ? 'Activo' : 'Inactivo'}</span></td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="toggleSlider(${s.id}, ${!s.activo})">${s.activo ? 'Desactivar' : 'Activar'}</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarSlider(${s.id})"><i class="fas fa-trash"></i> Eliminar</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('sliderTable').innerHTML = html;
+        } catch (e) {
+            console.error(e);
         }
-        document.getElementById('sliderTable').innerHTML = html;
     }
 
     function abrirModalSlider() {
@@ -669,43 +1254,68 @@
 
     async function subirImagenSlider() {
         let img = document.getElementById('sliderImagen').files[0];
-        if(!img) { Swal.fire('Error','Selecciona una imagen','error'); return; }
+        if (!img) {
+            Swal.fire('Error', 'Selecciona una imagen', 'error');
+            return;
+        }
+        
         let form = new FormData();
         form.append('imagen', img);
-        Swal.fire({title:'Subiendo...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
-        let res = await fetch(window.API_URL+'/api/slider', {method:'POST', body:form});
-        if(res.ok) { Swal.fire('Éxito','Imagen subida','success'); cerrarModal('modalSlider'); cargarSlider(); cargarEstadisticas(); }
-        else Swal.fire('Error','Error al subir','error');
+        
+        Swal.fire({ title: 'Subiendo...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        
+        let res = await fetch(window.API_URL + '/api/slider', { method: 'POST', body: form });
+        
+        if (res.ok) {
+            Swal.fire('Éxito', 'Imagen subida', 'success');
+            cerrarModal('modalSlider');
+            cargarSlider();
+            cargarEstadisticas();
+        } else {
+            Swal.fire('Error', 'Error al subir', 'error');
+        }
     }
 
     async function toggleSlider(id, activo) {
-        await fetch(window.API_URL+`/api/slider/${id}/toggle?activo=${activo}`, {method:'PUT'});
+        await fetch(window.API_URL + `/api/slider/${id}/toggle?activo=${activo}`, { method: 'PUT' });
         cargarSlider();
     }
 
     async function eliminarSlider(id) {
-        let confirm = await Swal.fire({title:'¿Eliminar?',icon:'warning',showCancelButton:true});
-        if(confirm.isConfirmed) { await fetch(window.API_URL+`/api/slider/${id}`,{method:'DELETE'}); cargarSlider(); cargarEstadisticas(); }
+        let confirm = await Swal.fire({ title: '¿Eliminar?', icon: 'warning', showCancelButton: true });
+        if (confirm.isConfirmed) {
+            await fetch(window.API_URL + `/api/slider/${id}`, { method: 'DELETE' });
+            cargarSlider();
+            cargarEstadisticas();
+            Swal.fire('Eliminado', 'Imagen eliminada', 'success');
+        }
     }
 
-    // ========== LOGOS ==========
+    // ==================== LOGOS ====================
     async function cargarLogos() {
-        let res = await fetch(window.API_URL+'/api/logo');
-        let data = await res.json();
-        let html = '';
-        if(data.length === 0) { html = '<div class="col-12 text-center text-muted">No hay logos disponibles. Sube uno.</div>'; }
-        else {
-            data.forEach(l => {
-                html += `<div class="col-md-3 mb-3"><div class="card bg-dark text-white"><div class="card-body text-center">
-                    <img src="${l.imagenUrl}" class="img-fluid mb-2" style="max-height:80px;" onerror="this.src='https://via.placeholder.com/80'">
-                    <p class="small">${l.titulo||'Logo'}</p>
-                    <button class="btn btn-success btn-sm" onclick="activarLogo(${l.id})">Activar</button>
-                    <button class="btn btn-danger btn-sm" onclick="eliminarLogo(${l.id})">Eliminar</button>
-                    ${l.activo ? '<span class="badge bg-success ms-2">ACTIVO</span>' : ''}
-                </div></div></div>`;
-            });
+        try {
+            let res = await fetch(window.API_URL + '/api/logo');
+            let data = await res.json();
+            let html = '';
+            if (data.length === 0) {
+                html = '<div class="col-12 text-center text-muted">No hay logos disponibles. Sube uno.</div>';
+            } else {
+                data.forEach(l => {
+                    html += `<div class="col-md-3 mb-3">
+                        <div class="logo-card">
+                            <img src="${l.imagenUrl}" class="img-fluid" onerror="this.src='https://via.placeholder.com/80'">
+                            <p class="small mt-2">${l.titulo || 'Logo'}</p>
+                            <button class="btn btn-success btn-sm" onclick="activarLogo(${l.id})">Activar</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarLogo(${l.id})">Eliminar</button>
+                            ${l.activo ? '<span class="badge bg-success ms-2">ACTIVO</span>' : ''}
+                        </div>
+                    </div>`;
+                });
+            }
+            document.getElementById('logosContainer').innerHTML = html;
+        } catch (e) {
+            console.error(e);
         }
-        document.getElementById('logosContainer').innerHTML = html;
     }
 
     function abrirModalLogo() {
@@ -715,62 +1325,96 @@
 
     async function subirLogo() {
         let img = document.getElementById('logoImagen').files[0];
-        if(!img) { Swal.fire('Error','Selecciona una imagen','error'); return; }
+        if (!img) {
+            Swal.fire('Error', 'Selecciona una imagen', 'error');
+            return;
+        }
+        
         let form = new FormData();
         form.append('imagen', img);
-        Swal.fire({title:'Subiendo...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
-        let res = await fetch(window.API_URL+'/api/logo', {method:'POST', body:form});
-        if(res.ok) { Swal.fire('Éxito','Logo subido','success'); cerrarModal('modalLogo'); cargarLogos(); }
-        else Swal.fire('Error','Error al subir','error');
+        
+        Swal.fire({ title: 'Subiendo...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        
+        let res = await fetch(window.API_URL + '/api/logo', { method: 'POST', body: form });
+        
+        if (res.ok) {
+            Swal.fire('Éxito', 'Logo subido', 'success');
+            cerrarModal('modalLogo');
+            cargarLogos();
+            cargarLogoActivoHeader();
+        } else {
+            Swal.fire('Error', 'Error al subir', 'error');
+        }
     }
 
     async function activarLogo(id) {
-        await fetch(window.API_URL+`/api/logo/${id}/activar`, {method:'PUT'});
+        await fetch(window.API_URL + `/api/logo/${id}/activar`, { method: 'PUT' });
         cargarLogos();
         cargarLogoActivoHeader();
     }
 
     async function eliminarLogo(id) {
-        let confirm = await Swal.fire({title:'¿Eliminar logo?',icon:'warning',showCancelButton:true});
-        if(confirm.isConfirmed) { await fetch(window.API_URL+`/api/logo/${id}`,{method:'DELETE'}); cargarLogos(); cargarLogoActivoHeader(); }
-    }
-
-    // ========== USUARIOS ==========
-    async function cargarUsuarios() {
-        let res = await fetch(window.API_URL+'/api/usuarios');
-        let data = await res.json();
-        let html = '';
-        if(data.length === 0) { html = '<tr><td colspan="7" style="text-align:center;">No hay usuarios</td></tr>'; }
-        else {
-            data.forEach(u => {
-                let rolClass = u.rol=='ADMIN'?'bg-danger':(u.rol=='SUBADMIN'?'bg-warning':'bg-info');
-                html += `<tr><td>${u.id}</td><td>${u.username}</td><td>${u.nombreCompleto||'-'}</td><td>${u.email||'-'}</td>
-                <td><span class="badge ${rolClass}">${u.rol}</span></td>
-                <td><span class="badge ${u.estado==1?'bg-success':'bg-danger'}">${u.estado==1?'Activo':'Inactivo'}</span></td>
-                <td><button class="btn btn-warning btn-sm" onclick="editarUsuario(${u.id})">Editar</button>
-                <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(${u.id})">Eliminar</button></td></tr>`;
-            });
+        let confirm = await Swal.fire({ title: '¿Eliminar logo?', icon: 'warning', showCancelButton: true });
+        if (confirm.isConfirmed) {
+            await fetch(window.API_URL + `/api/logo/${id}`, { method: 'DELETE' });
+            cargarLogos();
+            cargarLogoActivoHeader();
+            Swal.fire('Eliminado', 'Logo eliminado', 'success');
         }
-        document.getElementById('usuariosTable').innerHTML = html;
     }
 
-    function abrirModalUsuario(id=null) {
-        if(id) editarUsuario(id);
-        else Swal.fire('Información', 'Para crear un nuevo usuario usa el registro', 'info');
+    // ==================== USUARIOS ====================
+    async function cargarUsuarios() {
+        try {
+            let res = await fetch(window.API_URL + '/api/usuarios');
+            let data = await res.json();
+            let html = '';
+            if (data.length === 0) {
+                html = '<tr><td colspan="7" class="text-center">No hay usuarios</td></tr>';
+            } else {
+                data.forEach(u => {
+                    let rolClass = u.rol == 'ADMIN' ? 'bg-danger' : (u.rol == 'SUBADMIN' ? 'bg-warning' : 'bg-info');
+                    html += `<tr>
+                        <td>${u.id}</td>
+                        <td>${u.username}</td>
+                        <td>${u.nombreCompleto || '-'}</td>
+                        <td>${u.email || '-'}</td>
+                        <td><span class="badge ${rolClass}">${u.rol}</span></td>
+                        <td><span class="badge ${u.estado == 1 ? 'bg-success' : 'bg-danger'}">${u.estado == 1 ? 'Activo' : 'Inactivo'}</span></td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editarUsuario(${u.id})"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(${u.id})"><i class="fas fa-trash"></i> Eliminar</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('usuariosTable').innerHTML = html;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function abrirModalUsuario() {
+        Swal.fire('Información', 'Para crear un nuevo usuario usa el registro', 'info');
     }
 
     async function editarUsuario(id) {
-        let res = await fetch(window.API_URL+`/api/usuarios/${id}`);
-        let u = await res.json();
-        document.getElementById('usuarioId').value = u.id;
-        document.getElementById('usuarioUsername').value = u.username;
-        document.getElementById('usuarioNombreCompleto').value = u.nombreCompleto||'';
-        document.getElementById('usuarioEmail').value = u.email||'';
-        document.getElementById('usuarioTelefono').value = u.telefono||'';
-        document.getElementById('usuarioDireccion').value = u.direccion||'';
-        document.getElementById('usuarioRol').value = u.rol;
-        document.getElementById('usuarioEstado').value = u.estado||1;
-        document.getElementById('modalUsuario').style.display = 'flex';
+        try {
+            let res = await fetch(window.API_URL + `/api/usuarios/${id}`);
+            let u = await res.json();
+            document.getElementById('usuarioId').value = u.id;
+            document.getElementById('usuarioUsername').value = u.username;
+            document.getElementById('usuarioNombreCompleto').value = u.nombreCompleto || '';
+            document.getElementById('usuarioEmail').value = u.email || '';
+            document.getElementById('usuarioTelefono').value = u.telefono || '';
+            document.getElementById('usuarioDireccion').value = u.direccion || '';
+            document.getElementById('usuarioRol').value = u.rol;
+            document.getElementById('usuarioEstado').value = u.estado || 1;
+            document.getElementById('usuarioPassword').value = '';
+            document.getElementById('modalUsuario').style.display = 'flex';
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async function actualizarUsuario() {
@@ -785,69 +1429,116 @@
             rol: document.getElementById('usuarioRol').value,
             estado: parseInt(document.getElementById('usuarioEstado').value)
         };
-        if(!usuario.username) { Swal.fire('Error','Usuario requerido','error'); return; }
-        Swal.fire({title:'Actualizando...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
-        let res = await fetch(window.API_URL+`/api/usuarios/${id}`, {
-            method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(usuario)
+        
+        Swal.fire({ title: 'Actualizando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+        
+        let res = await fetch(window.API_URL + `/api/usuarios/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(usuario)
         });
-        if(res.ok) { Swal.fire('Éxito','Usuario actualizado','success'); cerrarModal('modalUsuario'); cargarUsuarios(); cargarEstadisticas(); }
-        else Swal.fire('Error','Error al actualizar','error');
-    }
-
-    async function eliminarUsuario(id) {
-        let confirm = await Swal.fire({title:'¿Eliminar usuario?',icon:'warning',showCancelButton:true});
-        if(confirm.isConfirmed) { await fetch(window.API_URL+`/api/usuarios/${id}`,{method:'DELETE'}); cargarUsuarios(); cargarEstadisticas(); }
-    }
-
-    async function eliminarArte(id, tipo) {
-        let confirm = await Swal.fire({title:'¿Eliminar?',icon:'warning',showCancelButton:true});
-        if(confirm.isConfirmed) {
-            await fetch(window.API_URL+`/api/arte/${id}`,{method:'DELETE'});
-            if(tipo==='arte-oficial') cargarArteOficial();
-            if(tipo==='fanart') cargarFanarts();
-            if(tipo==='descartado') cargarDescartados();
+        
+        if (res.ok) {
+            Swal.fire('Éxito', 'Usuario actualizado', 'success');
+            cerrarModal('modalUsuario');
+            cargarUsuarios();
             cargarEstadisticas();
+        } else {
+            Swal.fire('Error', 'Error al actualizar', 'error');
         }
     }
 
+    async function eliminarUsuario(id) {
+        let confirm = await Swal.fire({ title: '¿Eliminar usuario?', icon: 'warning', showCancelButton: true });
+        if (confirm.isConfirmed) {
+            await fetch(window.API_URL + `/api/usuarios/${id}`, { method: 'DELETE' });
+            cargarUsuarios();
+            cargarEstadisticas();
+            Swal.fire('Eliminado', 'Usuario eliminado', 'success');
+        }
+    }
+
+    // ==================== ELIMINAR ARTE GENÉRICO ====================
+    async function eliminarArte(id, tipo) {
+        let confirm = await Swal.fire({ title: '¿Eliminar?', icon: 'warning', showCancelButton: true });
+        if (confirm.isConfirmed) {
+            await fetch(window.API_URL + `/api/arte/${id}`, { method: 'DELETE' });
+            
+            if (tipo === 'arte-oficial') cargarArteOficial();
+            if (tipo === 'fanart') cargarFanarts();
+            if (tipo === 'descartado') cargarDescartados();
+            
+            cargarEstadisticas();
+            Swal.fire('Eliminado', 'Elemento eliminado', 'success');
+        }
+    }
+
+    // ==================== EXPORTAR USUARIOS ====================
+    async function exportarUsuarios() {
+        try {
+            Swal.fire({ title: 'Exportando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+            
+            let response = await fetch(window.API_URL + '/api/exportar/usuarios');
+            let blob = await response.blob();
+            let url = window.URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            let fecha = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            a.download = `fnafhs_usuarios_${fecha}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            Swal.fire('Éxito', 'Usuarios exportados', 'success');
+        } catch (e) {
+            Swal.fire('Error', 'No se pudo exportar', 'error');
+        }
+    }
+
+    // ==================== LOGO HEADER ====================
     async function cargarLogoActivoHeader() {
         try {
-            let res = await fetch(window.API_URL+'/api/logo/activo');
+            let res = await fetch(window.API_URL + '/api/logo/activo');
             let data = await res.json();
             let logoImg = document.getElementById('headerLogo');
-            if(data && data.imagenUrl) {
+            if (data && data.imagenUrl) {
                 logoImg.src = data.imagenUrl;
                 logoImg.style.display = 'block';
             } else {
                 logoImg.style.display = 'none';
             }
-        } catch(e){}
+        } catch (e) {
+            console.error(e);
+        }
     }
 
-    // Logout
+    // ==================== LOGOUT ====================
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('authToken');
         localStorage.removeItem('userData');
-        window.location.href = '/frontend/pages/index.html';
+        window.location.href = '../index.html';
     });
 
-    // Verificar autenticación
+    // ==================== VERIFICAR AUTENTICACIÓN ====================
     const token = localStorage.getItem('authToken');
     if (!token) {
-        window.location.href = '/frontend/pages/login.html';
+        window.location.href = 'login.html';
     } else {
         try {
             const userData = JSON.parse(localStorage.getItem('userData') || '{}');
             if (userData.rol !== 'ADMIN') {
-                window.location.href = '/frontend/pages/index.html';
+                window.location.href = '../index.html';
             }
-        } catch(e) {
-            window.location.href = '/frontend/pages/login.html';
+        } catch (e) {
+            window.location.href = 'login.html';
         }
     }
 
+    // ==================== INICIALIZAR ====================
     cargarTabActual();
+    cargarLogoActivoHeader();
 </script>
 </body>
 </html>

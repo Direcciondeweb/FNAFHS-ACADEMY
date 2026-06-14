@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +7,238 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="../../css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/estilos.css">
     <script>
         window.API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:8080'
             : 'https://fnafhs-academy-backend.onrender.com';
     </script>
     <style>
-        .profile-card { background: #1a1a2e; border-radius: 12px; padding: 20px; border: 1px solid rgba(208, 252, 11, 0.2); }
-        body { background: linear-gradient(180deg, #4c0867 12%, #370505 40%); min-height: 100vh; }
-        .logo-placeholder { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --borgoña: #fd0000;
+            --borgoña-2: #a725bb;
+            --oro: #d0fc0b;
+        }
+        
+        body {
+            background: linear-gradient(180deg, #4c0867 12%, #370505 40%);
+            min-height: 100vh;
+            padding-top: 80px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, rgba(255, 2, 2, 0.98), rgba(64, 23, 118, 0.96));
+            height: 80px;
+            display: flex;
+            align-items: center;
+            z-index: 120;
+        }
+        
+        .header-inner {
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-img {
+            height: 50px;
+            width: auto;
+            border-radius: 8px;
+            background: white;
+            padding: 5px;
+        }
+        
+        .brand h1 {
+            font-size: 1.2rem;
+            color: white;
+            margin: 0;
+        }
+        
+        .nav-list {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            margin: 0;
+        }
+        
+        .nav-list a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .nav-list a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .profile-container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .profile-card {
+            background: linear-gradient(135deg, #1e1e2a, #161622);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(208, 252, 11, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(208, 252, 11, 0.2);
+        }
+        
+        .profile-header h2 {
+            color: var(--oro);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .profile-header p {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .avatar-circle {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--borgoña), var(--borgoña-2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 3px solid var(--oro);
+        }
+        
+        .avatar-circle i {
+            font-size: 50px;
+            color: white;
+        }
+        
+        .form-label {
+            color: var(--oro);
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+        
+        .form-control, .form-select {
+            background: #2a2a35;
+            border: 1px solid rgba(208, 252, 11, 0.3);
+            color: white;
+            border-radius: 12px;
+            padding: 12px 15px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: #2a2a35;
+            border-color: var(--oro);
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(208, 252, 11, 0.25);
+        }
+        
+        .form-control[readonly] {
+            background: #1a1a25;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--borgoña), var(--borgoña-2));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(208, 252, 11, 0.3);
+        }
+        
+        .btn-outline-secondary {
+            border: 1px solid rgba(208, 252, 11, 0.3);
+            color: #ccc;
+            padding: 10px 25px;
+            border-radius: 40px;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: rgba(208, 252, 11, 0.1);
+            border-color: var(--oro);
+            color: var(--oro);
+        }
+        
+        .info-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-admin { background: #dc3545; color: white; }
+        .badge-subadmin { background: #ffc107; color: #1a1a2e; }
+        .badge-user { background: #17a2b8; color: white; }
+        
+        .stats-mini {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(208, 252, 11, 0.2);
+        }
+        
+        .stat-mini-item {
+            text-align: center;
+        }
+        
+        .stat-mini-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--oro);
+        }
+        
+        .stat-mini-label {
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding-top: 120px; }
+            .header-inner { flex-direction: column; gap: 10px; padding: 10px 0; }
+            .brand h1 { font-size: 0.9rem; }
+            .profile-card { padding: 20px; }
+            .profile-header h2 { font-size: 1.3rem; }
+        }
     </style>
 </head>
 <body>
@@ -24,100 +246,186 @@
 <header class="site-header">
     <div class="header-inner">
         <div class="brand">
-            <div id="headerLogoContainer" class="logo-placeholder">
-                <img id="headerLogo" class="logo-img" src="" alt="Logo" style="display:none; width:40px; height:40px; object-fit:cover; border-radius:50%;">
-            </div>
+            <img id="headerLogo" class="logo-img" src="" alt="Logo" style="display:none;">
             <h1>★ FNAFHS 📚 ACADEMY ★</h1>
         </div>
         <nav class="main-nav">
             <ul class="nav-list">
                 <li class="nav-item"><a href="user.html" class="nav-link active"><i class="fas fa-user-circle"></i><span>Mi Perfil</span></a></li>
-                <li class="nav-item"><a href="../../index.html" class="nav-link"><i class="fas fa-eye"></i><span>Ver Sitio</span></a></li>
+                <li class="nav-item"><a href="../index.html" class="nav-link"><i class="fas fa-eye"></i><span>Ver Sitio</span></a></li>
                 <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link"><i class="fas fa-sign-out-alt"></i><span>Salir</span></a></li>
             </ul>
         </nav>
     </div>
 </header>
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="profile-card">
-                <h4 class="mb-4" style="color: var(--oro);"><i class="fas fa-user-astronaut me-2"></i>Mi Perfil</h4>
-                <form id="perfilForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-light">Usuario</label>
-                            <input type="text" id="perfilUsername" class="form-control bg-secondary text-white" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-light">Rol</label>
-                            <input type="text" id="perfilRol" class="form-control bg-secondary text-white" readonly>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label text-light">Nombre Completo</label>
-                            <input type="text" id="perfilNombreCompleto" class="form-control bg-secondary text-white">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-light">Email</label>
-                            <input type="email" id="perfilEmail" class="form-control bg-secondary text-white">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-light">Teléfono</label>
-                            <input type="tel" id="perfilTelefono" class="form-control bg-secondary text-white">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label text-light">Dirección</label>
-                            <textarea id="perfilDireccion" class="form-control bg-secondary text-white" rows="2"></textarea>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label text-light">Nueva Contraseña</label>
-                            <input type="password" id="perfilPassword" class="form-control bg-secondary text-white" placeholder="Dejar vacío para no cambiar">
-                        </div>
-                        <div class="col-12">
-                            <button type="button" class="btn btn-primary" id="btnActualizarPerfil"><i class="fas fa-save me-2"></i>Actualizar Perfil</button>
-                        </div>
-                    </div>
-                </form>
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="avatar-circle">
+                <i class="fas fa-user-astronaut"></i>
             </div>
-            <div class="text-center mt-4">
-                <a href="../../index.html" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Volver al Sitio</a>
+            <h2>Mi Perfil</h2>
+            <p>Gestiona tu información personal</p>
+        </div>
+
+        <form id="perfilForm">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-user me-2"></i>Usuario
+                    </label>
+                    <input type="text" id="perfilUsername" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-tag me-2"></i>Rol
+                    </label>
+                    <div>
+                        <input type="text" id="perfilRol" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">
+                        <i class="fas fa-user-circle me-2"></i>Nombre Completo
+                    </label>
+                    <input type="text" id="perfilNombreCompleto" class="form-control" placeholder="Tu nombre completo">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-envelope me-2"></i>Email
+                    </label>
+                    <input type="email" id="perfilEmail" class="form-control" placeholder="tu@email.com">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-phone me-2"></i>Teléfono
+                    </label>
+                    <input type="tel" id="perfilTelefono" class="form-control" placeholder="999 999 999">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">
+                        <i class="fas fa-map-marker-alt me-2"></i>Dirección
+                    </label>
+                    <textarea id="perfilDireccion" class="form-control" rows="2" placeholder="Tu dirección"></textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">
+                        <i class="fas fa-key me-2"></i>Nueva Contraseña
+                    </label>
+                    <input type="password" id="perfilPassword" class="form-control" placeholder="Dejar vacío para no cambiar">
+                    <small class="text-muted">Mínimo 6 caracteres</small>
+                </div>
+                <div class="col-12 text-center mt-3">
+                    <button type="button" class="btn btn-primary" id="btnActualizarPerfil">
+                        <i class="fas fa-save me-2"></i>Actualizar Perfil
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="stats-mini">
+            <div class="stat-mini-item">
+                <div class="stat-mini-number" id="miembroDesde">-</div>
+                <div class="stat-mini-label">Miembro desde</div>
+            </div>
+            <div class="stat-mini-item">
+                <div class="stat-mini-number" id="estadoCuenta">-</div>
+                <div class="stat-mini-label">Estado</div>
             </div>
         </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="../index.html" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver al Sitio
+        </a>
     </div>
 </div>
 
 <script>
+    // ==================== VARIABLES GLOBALES ====================
     let usuarioActual = null;
 
+    // ==================== CARGAR PERFIL ====================
     async function cargarPerfil() {
         try {
             const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            if (!userData.id) {
+                throw new Error('No hay sesión activa');
+            }
+            
             const response = await fetch(window.API_URL + `/api/usuarios/${userData.id}`);
+            
+            if (!response.ok) {
+                throw new Error('Error al cargar perfil');
+            }
+            
             usuarioActual = await response.json();
             
+            // Mostrar datos en el formulario
             document.getElementById('perfilUsername').value = usuarioActual.username || '';
-            document.getElementById('perfilRol').value = usuarioActual.rol || '';
+            
+            // Mostrar rol con formato bonito
+            let rolText = '';
+            let rolClass = '';
+            if (usuarioActual.rol === 'ADMIN') {
+                rolText = 'Administrador';
+                rolClass = 'badge-admin';
+            } else if (usuarioActual.rol === 'SUBADMIN') {
+                rolText = 'Sub Administrador';
+                rolClass = 'badge-subadmin';
+            } else {
+                rolText = 'Usuario Normal';
+                rolClass = 'badge-user';
+            }
+            document.getElementById('perfilRol').value = rolText;
+            
             document.getElementById('perfilNombreCompleto').value = usuarioActual.nombreCompleto || '';
             document.getElementById('perfilEmail').value = usuarioActual.email || '';
             document.getElementById('perfilTelefono').value = usuarioActual.telefono || '';
             document.getElementById('perfilDireccion').value = usuarioActual.direccion || '';
-        } catch(e) {
+            
+            // Mostrar fecha de registro
+            if (usuarioActual.fechaRegistro) {
+                const fecha = new Date(usuarioActual.fechaRegistro);
+                const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                document.getElementById('miembroDesde').innerText = `${meses[fecha.getMonth()]} ${fecha.getFullYear()}`;
+            } else {
+                document.getElementById('miembroDesde').innerText = '2024';
+            }
+            
+            // Mostrar estado
+            const estadoSpan = document.getElementById('estadoCuenta');
+            if (usuarioActual.estado === 1) {
+                estadoSpan.innerHTML = '<span style="color: #28a745;">● Activo</span>';
+            } else {
+                estadoSpan.innerHTML = '<span style="color: #dc3545;">● Inactivo</span>';
+            }
+            
+        } catch (e) {
             console.error('Error cargando perfil:', e);
+            Swal.fire('Error', 'No se pudo cargar tu perfil', 'error');
         }
     }
 
-    async function cargarLogoActivoHeader() {
-        try {
-            let res = await fetch(window.API_URL+'/api/logo/activo');
-            let data = await res.json();
-            let logoImg = document.getElementById('headerLogo');
-            if(data && data.imagenUrl) { logoImg.src = data.imagenUrl; logoImg.style.display = 'block'; }
-            else { logoImg.style.display = 'none'; }
-        } catch(e){}
-    }
-
+    // ==================== ACTUALIZAR PERFIL ====================
     document.getElementById('btnActualizarPerfil').onclick = async () => {
+        // Validar email si se proporcionó
+        const email = document.getElementById('perfilEmail').value;
+        if (email && !email.includes('@')) {
+            Swal.fire('Error', 'Ingresa un email válido', 'error');
+            return;
+        }
+        
+        // Validar contraseña si se proporcionó
+        const nuevaPass = document.getElementById('perfilPassword').value;
+        if (nuevaPass && nuevaPass.length < 6) {
+            Swal.fire('Error', 'La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+        
         let usuario = {
             username: document.getElementById('perfilUsername').value,
             nombreCompleto: document.getElementById('perfilNombreCompleto').value,
@@ -125,40 +433,105 @@
             telefono: document.getElementById('perfilTelefono').value,
             direccion: document.getElementById('perfilDireccion').value,
             rol: usuarioActual.rol,
-            estado: 1
+            estado: usuarioActual.estado
         };
-        let nuevaPass = document.getElementById('perfilPassword').value;
-        if(nuevaPass) usuario.password = nuevaPass;
-
-        Swal.fire({title:'Actualizando...', didOpen:()=>Swal.showLoading(), allowOutsideClick:false});
         
-        let res = await fetch(window.API_URL+`/api/usuarios/${usuarioActual.id}`, {
-            method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(usuario)
+        if (nuevaPass) {
+            usuario.password = nuevaPass;
+        }
+        
+        Swal.fire({
+            title: 'Actualizando...',
+            didOpen: () => Swal.showLoading(),
+            allowOutsideClick: false
         });
         
-        if(res.ok) {
-            const updatedUser = await res.json();
-            localStorage.setItem('userData', JSON.stringify(updatedUser));
-            Swal.fire('Éxito','Perfil actualizado','success');
-            document.getElementById('perfilPassword').value = '';
-            cargarPerfil();
-        } else {
-            Swal.fire('Error','Error al actualizar','error');
+        try {
+            let res = await fetch(window.API_URL + `/api/usuarios/${usuarioActual.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(usuario)
+            });
+            
+            if (res.ok) {
+                const updatedUser = await res.json();
+                localStorage.setItem('userData', JSON.stringify(updatedUser));
+                
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'Tu perfil ha sido actualizado',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                document.getElementById('perfilPassword').value = '';
+                cargarPerfil();
+            } else {
+                const error = await res.text();
+                Swal.fire('Error', error || 'Error al actualizar perfil', 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'Error de conexión con el servidor', 'error');
         }
     };
 
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userData');
-        window.location.href = '../../index.html';
-    });
-
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-        window.location.href = '../login.html';
+    // ==================== CARGAR LOGO ====================
+    async function cargarLogoActivoHeader() {
+        try {
+            let res = await fetch(window.API_URL + '/api/logo/activo');
+            let data = await res.json();
+            let logoImg = document.getElementById('headerLogo');
+            if (data && data.imagenUrl) {
+                logoImg.src = data.imagenUrl;
+                logoImg.style.display = 'block';
+            } else {
+                logoImg.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('Error cargando logo:', e);
+        }
     }
 
+    // ==================== LOGOUT ====================
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        Swal.fire({
+            title: '¿Cerrar sesión?',
+            text: '¿Estás seguro de que quieres salir?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, salir',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userData');
+                window.location.href = '../index.html';
+            }
+        });
+    });
+
+    // ==================== VERIFICAR AUTENTICACIÓN ====================
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        window.location.href = 'login.html';
+    } else {
+        try {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            // Los usuarios normales pueden acceder, no redirigir
+            if (!userData.id) {
+                window.location.href = 'login.html';
+            }
+        } catch (e) {
+            window.location.href = 'login.html';
+        }
+    }
+
+    // ==================== INICIALIZAR ====================
     cargarPerfil();
     cargarLogoActivoHeader();
 </script>
