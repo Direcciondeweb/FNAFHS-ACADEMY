@@ -3,6 +3,7 @@ package com.example.semana07.controller;
 import com.example.semana07.entity.Arte;
 import com.example.semana07.entity.Usuario;
 import com.example.semana07.service.ArteService;
+import com.example.semana07.service.CloudStorageService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +28,8 @@ public class ArteController {
     @Autowired
     private ArteService arteService;
 
-    @Value("${file.upload-dir:./imagenes/}")
-    private String uploadDir;
+    @Autowired
+    private CloudStorageService cloudStorageService;
 
     @GetMapping
     public ResponseEntity<List<Arte>> listar() {
@@ -52,7 +53,6 @@ public class ArteController {
             @RequestParam("imagenFile") MultipartFile imagenFile,
             @RequestParam(value = "comicId", required = false) String comicId,
             @RequestParam(value = "totalPaginas", defaultValue = "1") Integer totalPaginas,
-            @RequestParam(value = "autor", required = false) String autor,
             HttpSession session) {
         try {
             Arte nuevoArte = new Arte();
@@ -71,13 +71,14 @@ public class ArteController {
                 default: carpeta = "arte";
             }
 
-            nuevoArte.setImagenUrl(guardarImagen(imagenFile, carpeta));
+            String urlCloudinary = cloudStorageService.uploadFile(imagenFile, carpeta);
+            nuevoArte.setImagenUrl(urlCloudinary);
 
             Map<String, String> sesion = datosSesion(session);
             Arte guardado = arteService.guardar(nuevoArte, sesion.get("usuario"), sesion.get("rol"));
 
             Map<String, Object> response = new HashMap<>();
-            response.put("mensaje", "Arte guardado correctamente");
+            response.put("mensaje", "Arte guardado correctamente en Cloudinary");
             response.put("arte", guardado);
             return ResponseEntity.ok(response);
         } catch (IOException e) {
@@ -90,8 +91,8 @@ public class ArteController {
         try {
             Arte arte = arteService.obtenerPorId(id).orElse(null);
             if (arte != null && arte.getImagenUrl() != null) {
-                String rutaRelativa = arte.getImagenUrl().replace("/imagenes/", "");
-                Files.deleteIfExists(Paths.get(uploadDir, rutaRelativa));
+                String publicId = cloudStorageService.extraerPublicId(arte.getImagenUrl());
+                cloudStorageService.deleteFile(publicId);
             }
             Map<String, String> sesion = datosSesion(session);
             arteService.eliminar(id, sesion.get("usuario"), sesion.get("rol"));
@@ -108,14 +109,10 @@ public class ArteController {
             Map<String, String> sesion = datosSesion(session);
             for (Arte pagina : paginas) {
                 if (pagina.getImagenUrl() != null) {
-                    String rutaRelativa = pagina.getImagenUrl().replace("/imagenes/", "");
-                    Files.deleteIfExists(Paths.get(uploadDir, rutaRelativa));
+                    String publicId = cloudStorageService.extraerPublicId(pagina.getImagenUrl());
+                    cloudStorageService.deleteFile(publicId);
                 }
                 arteService.eliminar(pagina.getId(), sesion.get("usuario"), sesion.get("rol"));
-            }
-            Path rutaCarpeta = Paths.get(uploadDir, "comics", comicId);
-            if (Files.exists(rutaCarpeta)) {
-                Files.walk(rutaCarpeta).sorted((a, b) -> b.compareTo(a)).map(Path::toFile).forEach(java.io.File::delete);
             }
             return ResponseEntity.ok(Map.of("mensaje", "Comic eliminado correctamente"));
         } catch (IOException e) {
@@ -134,18 +131,5 @@ public class ArteController {
             datos.put("rol", "N/A");
         }
         return datos;
-    }
-
-    private String guardarImagen(MultipartFile imagen, String subCarpeta) throws IOException {
-        Path rutaCarpeta = Paths.get(uploadDir, subCarpeta);
-        if (!Files.exists(rutaCarpeta)) Files.createDirectories(rutaCarpeta);
-        String extension = "";
-        String nombreOriginal = imagen.getOriginalFilename();
-        if (nombreOriginal != null && nombreOriginal.contains(".")) {
-            extension = nombreOriginal.substring(nombreOriginal.lastIndexOf("."));
-        }
-        String nombreArchivo = UUID.randomUUID().toString() + extension;
-        Files.write(Paths.get(uploadDir, subCarpeta, nombreArchivo), imagen.getBytes());
-        return "/imagenes/" + subCarpeta + "/" + nombreArchivo;
     }
 }

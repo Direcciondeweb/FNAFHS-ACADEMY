@@ -2,6 +2,7 @@ package com.example.semana07.controller;
 
 import com.example.semana07.entity.Usuario;
 import com.example.semana07.entity.Video;
+import com.example.semana07.service.CloudStorageService;
 import com.example.semana07.service.VideoService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +28,8 @@ public class VideoController {
     @Autowired
     private VideoService videoService;
 
-    @Value("${file.upload-dir:./imagenes/}")
-    private String uploadDir;
-
-    private static final String CARPETA = "videos";
+    @Autowired
+    private CloudStorageService cloudStorageService;
 
     @GetMapping
     public ResponseEntity<List<Video>> listar() {
@@ -49,30 +48,21 @@ public class VideoController {
             HttpSession session) {
         try {
             if (videoFile.isEmpty()) {
-                return ResponseEntity.badRequest().body("No se seleccionó ningún video");
+                return ResponseEntity.badRequest().body(Map.of("error", "No se seleccionó ningún video"));
             }
 
-            Path rutaCarpeta = Paths.get(uploadDir, CARPETA);
-            if (!Files.exists(rutaCarpeta)) Files.createDirectories(rutaCarpeta);
-
-            String extension = "";
-            String nombreOriginal = videoFile.getOriginalFilename();
-            if (nombreOriginal != null && nombreOriginal.contains(".")) {
-                extension = nombreOriginal.substring(nombreOriginal.lastIndexOf("."));
-            }
-            String nombreArchivo = UUID.randomUUID().toString() + extension;
-            Files.write(Paths.get(uploadDir, CARPETA, nombreArchivo), videoFile.getBytes());
+            String urlCloudinary = cloudStorageService.uploadFile(videoFile, "videos");
 
             Video nuevoVideo = new Video();
             nuevoVideo.setTitulo(titulo);
-            nuevoVideo.setVideoUrl("/imagenes/" + CARPETA + "/" + nombreArchivo);
+            nuevoVideo.setVideoUrl(urlCloudinary);
             nuevoVideo.setEstado(1);
 
             Map<String, String> sesion = datosSesion(session);
             Video guardado = videoService.guardar(nuevoVideo, sesion.get("usuario"), sesion.get("rol"));
             return ResponseEntity.ok(guardado);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -81,8 +71,8 @@ public class VideoController {
         Video video = videoService.obtenerPorId(id).orElse(null);
         if (video != null && video.getVideoUrl() != null) {
             try {
-                String rutaRelativa = video.getVideoUrl().replace("/imagenes/", "");
-                Files.deleteIfExists(Paths.get(uploadDir, rutaRelativa));
+                String publicId = cloudStorageService.extraerPublicId(video.getVideoUrl());
+                cloudStorageService.deleteFile(publicId);
             } catch (IOException e) {
                 e.printStackTrace();
             }
