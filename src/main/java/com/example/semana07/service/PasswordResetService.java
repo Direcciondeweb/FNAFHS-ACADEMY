@@ -19,7 +19,10 @@ public class PasswordResetService {
 
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PasswordResetTokenRepository tokenRepository;
-    @Autowired private JavaMailSender mailSender;
+
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
+
     @Autowired private PasswordEncoder passwordEncoder;
 
     @Value("${app.base-url:http://localhost:8080}")
@@ -41,18 +44,29 @@ public class PasswordResetService {
         tokenRepository.save(resetToken);
 
         String resetUrl = baseUrl + "/reset-password?token=" + token;
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(usuario.getEmail());
-        message.setSubject("FNAFHS Academy - Recuperación de Contraseña");
-        message.setText("Hola " + (usuario.getNombreCompleto() != null ? usuario.getNombreCompleto() : usuario.getUsername()) + ",\n\n"
-                + "Has solicitado restablecer tu contraseña.\n\n"
-                + "Haz clic en el siguiente enlace para crear una nueva contraseña:\n"
-                + resetUrl + "\n\n"
-                + "Este enlace expirará en 24 horas.\n\n"
-                + "Si no solicitaste este cambio, ignora este mensaje.\n\n"
-                + "★ FNAFHS ACADEMY ★");
 
-        mailSender.send(message);
+        if (mailSender == null) {
+            System.err.println("⚠️ Mail no configurado, no se pudo enviar el correo de recuperación. Token generado: " + token);
+            return true;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(usuario.getEmail());
+            message.setSubject("FNAFHS Academy - Recuperación de Contraseña");
+            message.setText("Hola " + (usuario.getNombreCompleto() != null ? usuario.getNombreCompleto() : usuario.getUsername()) + ",\n\n"
+                    + "Has solicitado restablecer tu contraseña.\n\n"
+                    + "Haz clic en el siguiente enlace para crear una nueva contraseña:\n"
+                    + resetUrl + "\n\n"
+                    + "Este enlace expirará en 24 horas.\n\n"
+                    + "Si no solicitaste este cambio, ignora este mensaje.\n\n"
+                    + "★ FNAFHS ACADEMY ★");
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("❌ Error al enviar el correo de recuperación: " + e.getMessage());
+        }
+
         return true;
     }
 
