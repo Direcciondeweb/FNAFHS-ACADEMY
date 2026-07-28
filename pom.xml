@@ -61,10 +61,10 @@
 
         <!-- PostgreSQL (Aiven - base de datos en la nube, 24/7) -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <scope>runtime</scope>
+</dependency>
 
         <!-- H2 (fallback local, para pruebas rápidas sin configurar nada) -->
         <dependency>
