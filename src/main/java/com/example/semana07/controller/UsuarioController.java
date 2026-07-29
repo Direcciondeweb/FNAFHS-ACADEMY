@@ -1,26 +1,29 @@
 package com.example.semana07.controller;
 
+import com.example.semana07.dto.UsuarioCreateDTO;
+import com.example.semana07.dto.UsuarioUpdateDTO;
 import com.example.semana07.entity.Usuario;
 import com.example.semana07.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
+
 import java.util.Map;
 import java.util.Set;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "*")
 public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
 
     @GetMapping
-    public ResponseEntity<List<Usuario>> listar() {
-        return ResponseEntity.ok(usuarioService.listarTodos());
+    public ResponseEntity<Page<Usuario>> listar(Pageable pageable) {
+        return ResponseEntity.ok(usuarioService.listarPaginado(pageable));
     }
 
     @GetMapping("/{id}")
@@ -46,77 +49,42 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@RequestBody Usuario usuario) {
-        try {
-            if (usuario.getEstado() == null) {
-                usuario.setEstado(1);
-            }
-            Usuario nuevoUsuario = usuarioService.guardar(usuario);
-            return ResponseEntity.ok(nuevoUsuario);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<?> crear(@Valid @RequestBody UsuarioCreateDTO dto) {
+        return ResponseEntity.ok(usuarioService.crearUsuario(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
-        try {
-            usuarioService.actualizarUsuario(id, usuario);
-            return ResponseEntity.ok(Map.of("mensaje", "Usuario actualizado correctamente"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody UsuarioUpdateDTO dto) {
+        Usuario actualizado = usuarioService.actualizarUsuario(id, dto);
+        return ResponseEntity.ok(Map.of("mensaje", "Usuario actualizado correctamente", "usuario", actualizado));
     }
 
     @PutMapping("/{id}/estado")
     public ResponseEntity<?> actualizarEstado(@PathVariable Long id, @RequestParam Integer estado) {
-        try {
-            usuarioService.actualizarEstado(id, estado);
-            return ResponseEntity.ok(Map.of("mensaje", "Estado actualizado"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        usuarioService.actualizarEstado(id, estado);
+        return ResponseEntity.ok(Map.of("mensaje", "Estado actualizado"));
     }
 
     @PutMapping("/{id}/rol")
     public ResponseEntity<?> actualizarRol(@PathVariable Long id, @RequestParam String rol) {
-        try {
-            Usuario usuario = usuarioService.actualizarRol(id, rol);
-            return ResponseEntity.ok(usuario);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.ok(usuarioService.actualizarRol(id, rol));
     }
 
     @PutMapping("/{id}/permisos-subadmin")
     public ResponseEntity<?> actualizarPermisosSubadmin(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, Boolean> permisosSubadmin = (Map<String, Boolean>) body.get("permisosSubadmin");
-            Usuario usuario = usuarioService.actualizarPermisosSubadmin(id, permisosSubadmin);
-            return ResponseEntity.ok(usuario);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        @SuppressWarnings("unchecked")
+        Map<String, Boolean> permisosSubadmin = (Map<String, Boolean>) body.get("permisosSubadmin");
+        return ResponseEntity.ok(usuarioService.actualizarPermisosSubadmin(id, permisosSubadmin));
     }
 
     @PutMapping("/{id}/permisos")
     public ResponseEntity<?> actualizarPermisos(@PathVariable Long id, @RequestBody Map<String, Set<String>> body) {
-        try {
-            Usuario usuario = usuarioService.actualizarPermisos(id, body.get("permisos"));
-            return ResponseEntity.ok(usuario);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.ok(usuarioService.actualizarPermisos(id, body.get("permisos")));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
-        try {
-            usuarioService.eliminar(id);
-            return ResponseEntity.ok().body(Map.of("mensaje", "Usuario eliminado correctamente"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        usuarioService.eliminar(id);
+        return ResponseEntity.ok(Map.of("mensaje", "Usuario eliminado correctamente"));
     }
 }

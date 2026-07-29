@@ -1,5 +1,7 @@
 package com.example.semana07.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -9,6 +11,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
@@ -17,7 +21,7 @@ public class EmailService {
 
     public void sendEmail(String to, String subject, String body) {
         if (mailSender == null) {
-            System.err.println("⚠️ Mail no configurado, no se envió el correo a: " + to);
+            log.warn("Mail no configurado, no se envió el correo a: {}", to);
             return;
         }
         try {
@@ -27,9 +31,9 @@ public class EmailService {
             message.setSubject(subject);
             message.setText(body);
             mailSender.send(message);
-            System.out.println("✅ Email enviado a: " + to);
+            log.info("Email enviado a: {}", to);
         } catch (Exception e) {
-            System.err.println("❌ Error al enviar email: " + e.getMessage());
+            log.error("Error al enviar email a {}: {}", to, e.getMessage());
         }
     }
 

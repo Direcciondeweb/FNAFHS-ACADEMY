@@ -1,10 +1,16 @@
 package com.example.semana07.service;
 
+import com.example.semana07.dto.UsuarioCreateDTO;
+import com.example.semana07.dto.UsuarioUpdateDTO;
 import com.example.semana07.entity.Usuario;
+import com.example.semana07.exception.ResourceNotFoundException;
 import com.example.semana07.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,67 +19,57 @@ import java.util.Set;
 @Service
 public class UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private HistorialService historialService;
+    @Autowired private UsuarioRepository usuarioRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private HistorialService historialService;
 
     public List<Usuario> listarTodos() {
         return usuarioRepository.findAll();
+    }
+
+    public Page<Usuario> listarPaginado(Pageable pageable) {
+        return usuarioRepository.findAll(pageable);
     }
 
     public Optional<Usuario> obtenerPorId(Long id) {
         return usuarioRepository.findById(id);
     }
 
-    public Optional<Usuario> autenticar(String username, String password) {
-        Optional<Usuario> usuario = usuarioRepository.findByUsername(username);
-        if (usuario.isPresent()
-                && passwordEncoder.matches(password, usuario.get().getPassword())
-                && usuario.get().getEstado() == 1) {
-            historialService.registrar(username, usuario.get().getRol(), "LOGIN", "Usuario", username, "Inicio de sesión");
-            return usuario;
+    public Usuario crearUsuario(UsuarioCreateDTO dto) {
+        if (usuarioRepository.existsByUsername(dto.getUsername())) {
+            throw new RuntimeException("El usuario ya existe");
         }
-        return Optional.empty();
-    }
-
-    public Usuario guardar(Usuario usuario) {
-        if ("ADMIN".equals(usuario.getRol()) && contarAdmins() >= 1) {
+        if ("ADMIN".equals(dto.getRol()) && contarAdmins() >= 1) {
             throw new RuntimeException("Solo puede existir un administrador en el sistema");
         }
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+
+        Usuario usuario = new Usuario();
+        usuario.setUsername(dto.getUsername());
+        usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+        usuario.setRol(dto.getRol() != null ? dto.getRol() : "USER");
+        usuario.setNombreCompleto(dto.getNombreCompleto());
+        usuario.setEmail(dto.getEmail());
+        usuario.setTelefono(dto.getTelefono());
+        usuario.setDireccion(dto.getDireccion());
+        usuario.setEstado(1);
+
         Usuario guardado = usuarioRepository.save(usuario);
-        historialService.registrar(usuario.getUsername(), usuario.getRol(), "CREAR", "Usuario",
-                String.valueOf(guardado.getId()), "Usuario registrado");
+        historialService.registrar(guardado.getUsername(), guardado.getRol(), "CREAR", "Usuario",
+                String.valueOf(guardado.getId()), "Usuario creado desde el panel");
         return guardado;
     }
 
-    public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {
+    public Usuario actualizarUsuario(Long id, UsuarioUpdateDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
-        usuario.setNombreCompleto(usuarioActualizado.getNombreCompleto());
-        usuario.setEmail(usuarioActualizado.getEmail());
-        usuario.setTelefono(usuarioActualizado.getTelefono());
-        usuario.setDireccion(usuarioActualizado.getDireccion());
+        usuario.setNombreCompleto(dto.getNombreCompleto());
+        usuario.setEmail(dto.getEmail());
+        usuario.setTelefono(dto.getTelefono());
+        usuario.setDireccion(dto.getDireccion());
 
-        if (usuarioActualizado.getPassword() != null && !usuarioActualizado.getPassword().isEmpty()) {
-            usuario.setPassword(passwordEncoder.encode(usuarioActualizado.getPassword()));
-        }
-
-        if (usuarioActualizado.getRol() != null) {
-            if ("ADMIN".equals(usuarioActualizado.getRol()) && contarAdmins() >= 1 && !"ADMIN".equals(usuario.getRol())) {
-                throw new RuntimeException("Solo puede existir un administrador");
-            }
-            usuario.setRol(usuarioActualizado.getRol());
-        }
-
-        if (usuarioActualizado.getEstado() != null) {
-            usuario.setEstado(usuarioActualizado.getEstado());
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
         Usuario actualizado = usuarioRepository.save(usuario);
@@ -84,7 +80,7 @@ public class UsuarioService {
 
     public void actualizarEstado(Long id, Integer estado) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         usuario.setEstado(estado);
         usuarioRepository.save(usuario);
         historialService.registrar(usuario.getUsername(), usuario.getRol(), "ACTUALIZAR", "Usuario",
@@ -93,7 +89,7 @@ public class UsuarioService {
 
     public Usuario actualizarRol(Long id, String rol) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         if ("ADMIN".equals(rol) && contarAdmins() >= 1 && !"ADMIN".equals(usuario.getRol())) {
             throw new RuntimeException("Solo puede existir un administrador");
         }
@@ -106,21 +102,21 @@ public class UsuarioService {
 
     public Usuario actualizarPermisosSubadmin(Long id, Map<String, Boolean> permisosSubadmin) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         usuario.setPermisosSubadmin(permisosSubadmin);
         return usuarioRepository.save(usuario);
     }
 
     public Usuario actualizarPermisos(Long id, Set<String> permisos) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         usuario.setPermisos(permisos);
         return usuarioRepository.save(usuario);
     }
 
     public void eliminar(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         if ("ADMIN".equals(usuario.getRol()) && contarAdmins() <= 1) {
             throw new RuntimeException("No se puede eliminar el único administrador");
         }
