@@ -29,20 +29,22 @@ public class SecurityConfig {
                         // Públicas
                         .requestMatchers("/", "/login", "/registro", "/register", "/error", "/test").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/vendors/**").permitAll()
-                        .requestMatchers("/fanarts", "/arte", "/descartados", "/gallery/**", "/content/**").permitAll()
+                        .requestMatchers("/personajes", "/arte", "/videos", "/comics", "/descartados",
+                                "/resenas", "/popular", "/gallery/**", "/content/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
 
                         // Lectura pública de contenido (galería)
                         .requestMatchers(HttpMethod.GET, "/api/arte/**", "/api/videos/**", "/api/personajes/**",
-                                "/api/slider/**", "/api/logo/**", "/api/comentarios/**", "/api/likes/**").permitAll()
+                                "/api/slider/**", "/api/logo/**", "/api/comentarios/**", "/api/likes/**",
+                                "/api/info-sitio/**", "/api/reportes/populares/**").permitAll()
 
                         // Escritura de contenido: solo ADMIN / SUBADMIN
                         .requestMatchers(HttpMethod.POST, "/api/arte/**", "/api/videos/**", "/api/personajes/**",
                                 "/api/logo/**", "/api/slider/**").hasAnyRole("ADMIN", "SUBADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/arte/**", "/api/videos/**", "/api/personajes/**",
-                                "/api/logo/**", "/api/slider/**").hasAnyRole("ADMIN", "SUBADMIN")
+                                "/api/logo/**", "/api/slider/**", "/api/info-sitio/**").hasAnyRole("ADMIN", "SUBADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/arte/**", "/api/videos/**", "/api/personajes/**",
                                 "/api/logo/**", "/api/slider/**").hasAnyRole("ADMIN", "SUBADMIN")
 

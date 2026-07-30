@@ -5,21 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FNAFHS ACADEMY</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
 </head>
 <body th:attr="data-logged=${#authorization.expression('isAuthenticated()')}">
 
 <header class="site-header">
     <div class="header-inner">
         <div class="brand">
-            <h1>★ FNAFHS <i class="fa-solid fa-book"></i> ACADEMY ★</h1>
+            <a th:href="@{/}" class="brand-link">
+                <h1>★ FNAFHS <i class="fa-solid fa-book"></i> ACADEMY ★</h1>
+            </a>
         </div>
-        <ul class="nav-list">
+        <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <ul class="nav-list" id="nav-list">
             <li class="nav-item"><a class="nav-link active" th:href="@{/}"><i class="fa-solid fa-house"></i> Inicio</a></li>
             <li class="nav-item"><a class="nav-link" th:href="@{/personajes}"><i class="fa-solid fa-user"></i> Personajes</a></li>
-            <li class="nav-item"><a class="nav-link" th:href="@{/fanarts}"><i class="fa-solid fa-image"></i> Fanarts</a></li>
             <li class="nav-item"><a class="nav-link" th:href="@{/arte}"><i class="fa-solid fa-palette"></i> Arte</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/videos}"><i class="fa-solid fa-film"></i> Videos</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/comics}"><i class="fa-solid fa-book-open"></i> Comics</a></li>
             <li class="nav-item"><a class="nav-link" th:href="@{/descartados}"><i class="fa-solid fa-trash"></i> Descartados</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/resenas}"><i class="fa-solid fa-comments"></i> Reseñas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/popular}"><i class="fa-solid fa-fire"></i> Lo Popular</a></li>
 
             <li class="nav-item" sec:authorize="!isAuthenticated()">
                 <a class="nav-link" th:href="@{/login}"><i class="fa-solid fa-right-to-bracket"></i> Ingresar</a>
@@ -29,12 +36,14 @@
             </li>
 
             <li class="nav-item" sec:authorize="isAuthenticated()">
-                <a class="nav-link" th:href="@{/user/notifications}"><i class="fa-solid fa-bell"></i>
+                <a class="nav-link" th:href="@{/user/notifications}">
+                    <i class="fa-solid fa-bell"></i>
                     <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
                 </a>
             </li>
             <li class="nav-item" sec:authorize="isAuthenticated()">
-                <a class="nav-link" th:href="@{/dashboard/user}"><i class="fa-solid fa-circle-user"></i>
+                <a class="nav-link" th:href="@{/dashboard/user}">
+                    <i class="fa-solid fa-circle-user"></i>
                     <span sec:authentication="name">Usuario</span>
                 </a>
             </li>
@@ -47,9 +56,6 @@
 
 <section class="hero">
     <div class="hero-slider" id="hero-slider">
-        <!-- Las imágenes del carrusel se cargan aquí dinámicamente desde /api/slider/activas
-             (subidas por el admin desde el panel de control, almacenadas en Cloudinary).
-             Mientras no haya ninguna configurada, se muestra un slide de respaldo. -->
         <div class="slide slide-default"></div>
     </div>
     <div class="hero-inner">
@@ -58,78 +64,23 @@
     </div>
 </section>
 
-<section class="personajes-section">
+<section class="info-section">
     <div class="container">
         <div class="section-header">
-            <h2 class="section-title">Personajes Destacados</h2>
+            <h2 class="section-title">Sobre el Proyecto</h2>
         </div>
-        <div class="items-grid" id="personajes-preview">
-            <!-- Se llena dinámicamente con /api/personajes/activos -->
-        </div>
-        <div class="ver-mas-container">
-            <a th:href="@{/personajes}" class="second-image-btn">Ver todos los personajes</a>
+        <div class="info-grid">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-eye"></i> Visión</h3>
+                <p id="info-vision" class="info-text">Próximamente...</p>
+            </div>
+            <div class="info-card">
+                <h3><i class="fa-solid fa-bullseye"></i> Misión</h3>
+                <p id="info-mision" class="info-text">Próximamente...</p>
+            </div>
         </div>
     </div>
 </section>
-
-<section class="fanarts-section">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">Últimos Fanarts</h2>
-        </div>
-        <div class="arte-grid" id="fanarts-preview">
-            <!-- Se llena dinámicamente con /api/arte/tipo/fanart -->
-        </div>
-        <div class="ver-mas-container">
-            <a th:href="@{/fanarts}" class="second-image-btn">Ver toda la galería</a>
-        </div>
-    </div>
-</section>
-
-<section class="arte-section">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">Arte Oficial</h2>
-        </div>
-        <div class="arte-grid" id="arte-preview">
-            <!-- Se llena dinámicamente con /api/arte/tipo/arte-oficial -->
-        </div>
-        <div class="ver-mas-container">
-            <a th:href="@{/arte}" class="second-image-btn">Ver más arte</a>
-        </div>
-    </div>
-</section>
-
-<!-- Modal de detalle de contenido: imagen grande + likes + comentarios -->
-<div id="content-modal" class="modal">
-    <div class="modal-content">
-        <span class="modal-close" id="modal-close">&times;</span>
-        <h2 id="modal-title">Título</h2>
-        <img id="modal-image" src="" alt="" style="max-width:100%; border-radius:12px; border:3px solid var(--oro);">
-
-        <div class="content-actions">
-            <button id="like-btn" class="like-btn">
-                <i class="fa-regular fa-heart"></i> <span id="like-count">0</span>
-            </button>
-            <span class="comment-count-label">
-                <i class="fa-regular fa-comment"></i> <span id="comment-count">0</span> comentarios
-            </span>
-        </div>
-
-        <div id="login-required-msg" class="login-required-msg" style="display:none;">
-            Debes <a th:href="@{/login}">iniciar sesión</a> para dar like o comentar.
-        </div>
-
-        <div id="comments-section" class="comments-section">
-            <div id="comments-list" class="comments-list"></div>
-
-            <form id="comment-form" class="comment-form" style="display:none;">
-                <textarea id="comment-text" placeholder="Escribe un comentario..." maxlength="1000" required></textarea>
-                <button type="submit">Comentar</button>
-            </form>
-        </div>
-    </div>
-</div>
 
 <footer class="site-footer">
     <div class="footer-container">
@@ -147,7 +98,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy;FNAFHS Academy. Proyecto de fans, sin fines de lucro.</p>
+            <p>&copy; FNAFHS Academy. Proyecto de fans, sin fines de lucro.</p>
         </div>
     </div>
 </footer>

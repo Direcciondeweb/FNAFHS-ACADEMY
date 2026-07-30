@@ -30,6 +30,7 @@ body {
   overflow-x: hidden;
   width: 100%;
   position: relative;
+  min-height: 100vh;
 }
 
 .container {
@@ -38,6 +39,7 @@ body {
   margin: 0 auto;
 }
 
+/* --- Header --- */
 .site-header {
   position: fixed;
   top: 0;
@@ -57,21 +59,37 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.brand-link {
+  text-decoration: none;
+  color: inherit;
 }
 
 .brand h1 {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: white;
   white-space: nowrap;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .nav-list {
   list-style: none;
   display: flex;
-  gap: 20px;
+  gap: 6px;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
 }
 
 .nav-item {
@@ -82,13 +100,15 @@ body {
 .nav-list .nav-link {
   display: flex !important;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: white;
   text-decoration: none;
-  padding: 8px 16px;
+  padding: 8px 12px;
   border-radius: 0.5rem;
   transition: 0.3s;
   font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
   position: relative;
 }
 
@@ -101,14 +121,13 @@ body {
 }
 
 .nav-list .nav-link i {
-  font-size: 1rem;
-  width: 20px;
+  font-size: 0.9rem;
 }
 
 .notif-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 0;
+  right: 0;
   background: var(--oro);
   color: #1a1a1a;
   font-size: 10px;
@@ -119,6 +138,7 @@ body {
   text-align: center;
 }
 
+/* --- Hero / Carrusel --- */
 .hero {
   position: relative;
   min-height: 90vh;
@@ -175,15 +195,7 @@ body {
   font-size: 1.1rem;
 }
 
-.personajes-section,
-.fanarts-section,
-.arte-section,
-.descartados-section {
-  padding: 60px 20px;
-  width: 100%;
-  overflow-x: hidden;
-}
-
+/* --- Secciones generales --- */
 .section-header {
   text-align: center;
   margin-bottom: 40px;
@@ -193,9 +205,56 @@ body {
   font-size: 2rem;
   font-family: 'Playfair Display', serif;
   color: var(--oro);
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
+/* --- Visión / Misión --- */
+.info-section {
+  padding: 60px 20px;
+  width: 100%;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
+.info-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(208, 252, 11, 0.25);
+  border-radius: 16px;
+  padding: 35px 30px;
+  text-align: center;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.info-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--oro);
+}
+
+.info-card h3 {
+  color: var(--oro);
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.info-text {
+  color: var(--crema);
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+/* --- Grids de contenido (para páginas de galería: personajes, arte, videos, etc.) --- */
 .items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -264,6 +323,14 @@ body {
   color: var(--crema);
 }
 
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: rgba(246,239,235,0.6);
+  padding: 40px 20px;
+  font-size: 14px;
+}
+
 .ver-mas-container {
   text-align: center;
   margin-top: 30px;
@@ -288,7 +355,7 @@ body {
   box-shadow: 0 6px 20px rgba(208, 252, 11, 0.4);
 }
 
-/* Modal */
+/* --- Modal de contenido --- */
 .modal {
   display: none;
   position: fixed;
@@ -375,10 +442,6 @@ body {
   color: white;
 }
 
-.like-btn.liked i {
-  font-weight: 900;
-}
-
 .comment-count-label {
   color: var(--crema);
   font-size: 14px;
@@ -460,6 +523,7 @@ body {
   cursor: pointer;
 }
 
+/* --- Footer --- */
 .site-footer {
   background: linear-gradient(90deg, rgba(255, 2, 2, 0.98), rgba(185, 31, 191, 0.96));
   color: white;
@@ -512,27 +576,52 @@ body {
   border-top: 1px solid rgba(255,255,255,0.2);
 }
 
+/* --- Menú hamburguesa responsive --- */
+@media (max-width: 1024px) {
+  .nav-toggle {
+    display: block;
+  }
+
+  .nav-list {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    position: absolute;
+    top: var(--header-height);
+    left: 0;
+    background: linear-gradient(180deg, rgba(76,8,103,0.98), rgba(55,5,5,0.98));
+    padding: 10px 20px 20px;
+    gap: 4px;
+    max-height: 80vh;
+    overflow-y: auto;
+    justify-content: flex-start;
+  }
+
+  .nav-list.open {
+    display: flex;
+  }
+
+  .nav-list .nav-link {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 768px) {
-  :root { --header-height: auto; }
-  body { padding-top: 100px; }
-  .site-header { position: fixed; height: auto; padding: 10px 0; }
-  .header-inner { flex-direction: column; gap: 8px; padding: 0; }
-  .brand h1 { font-size: 0.9rem; white-space: normal; text-align: center; }
-  .nav-list { gap: 8px; flex-wrap: wrap; justify-content: center; }
-  .nav-list .nav-link { font-size: 11px; padding: 5px 10px; gap: 5px; }
-  .nav-list .nav-link i { font-size: 0.8rem; width: 16px; }
   .hero-title { font-size: 1.3rem; }
   .hero-sub { font-size: 0.9rem; }
   .section-title { font-size: 1.5rem; }
   .items-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
   .arte-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+  .info-grid { grid-template-columns: 1fr; }
   .footer-content { flex-direction: column; text-align: center; }
   .modal-content { margin: 10% auto; padding: 15px; width: 95%; }
   #modal-title { font-size: 1.3rem; }
 }
 
 @media (max-width: 480px) {
-  body { padding-top: 110px; }
   .items-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
   .arte-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
 }
