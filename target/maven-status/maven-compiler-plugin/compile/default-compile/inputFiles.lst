@@ -1,9 +1,12 @@
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\ReporteRepository.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\dto\CambiarPasswordConCodigoDTO.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\Notificacion.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\VideoRepository.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\CodigoVerificacion.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\NotificacionService.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\PasswordResetService.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\controller\PersonajeController.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\CodigoVerificacionRepository.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\controller\TestController.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\config\MvcConfig.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\controller\VideoController.java
@@ -25,6 +28,7 @@ C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\controller\Anal
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\Comentario.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\HistorialService.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\Video.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\InfoSitioService.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\SliderImageRepository.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\PasswordResetTokenRepository.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\SliderImage.java
@@ -32,8 +36,10 @@ C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\Usuario
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\VideoService.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\dto\ResetPasswordDTO.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\HistorialAccion.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\CodigoVerificacionService.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\controller\ArteController.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\NotificacionRepository.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\controller\InfoSitioController.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\DataInitializer.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\LikeContenidoService.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\SliderImageService.java
@@ -45,6 +51,7 @@ C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\CustomU
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\config\SecurityBeansConfig.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\LogoRepository.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\ReporteService.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\dto\SolicitarCodigoDTO.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\UsuarioRepository.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\LikeContenidoRepository.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\security\UsuarioPrincipal.java
@@ -54,6 +61,7 @@ C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\LikeCont
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\controller\DashboardController.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\controller\ComentarioController.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\AnalyticsService.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\dto\VerificarCodigoDTO.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\service\LogoService.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\Reporte.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\controller\LikeContenidoController.java
@@ -69,6 +77,8 @@ C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\Pers
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\Semana07Application.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\HistorialAccionRepository.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\dto\ComentarioCreateDTO.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\repository\InfoSitioRepository.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\Personaje.java
+C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\InfoSitio.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\entity\Logo.java
 C:\Users\Diana\FNAFHS-ACADEMY\src\main\java\com\example\semana07\config\SecurityConfig.java

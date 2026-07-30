@@ -1,10 +1,12 @@
 package com.example.semana07.controller;
 
-import com.example.semana07.dto.ForgotPasswordDTO;
-import com.example.semana07.dto.ResetPasswordDTO;
-import com.example.semana07.service.PasswordResetService;
+import com.example.semana07.dto.CambiarPasswordConCodigoDTO;
+import com.example.semana07.dto.SolicitarCodigoDTO;
+import com.example.semana07.dto.VerificarCodigoDTO;
+import com.example.semana07.service.CodigoVerificacionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,7 +18,7 @@ import java.util.Map;
 public class AuthController {
 
     @Autowired
-    private PasswordResetService passwordResetService;
+    private CodigoVerificacionService codigoVerificacionService;
 
     @GetMapping("/login")
     public String showLogin(@RequestParam(required = false) String error,
@@ -31,23 +33,56 @@ public class AuthController {
         return "login";
     }
 
-    @PostMapping("/api/auth/forgot-password")
+    @PostMapping("/api/auth/solicitar-codigo")
     @ResponseBody
-    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordDTO dto) {
-        boolean sent = passwordResetService.sendResetEmail(dto.getEmail());
+    public ResponseEntity<?> solicitarCodigo(@Valid @RequestBody SolicitarCodigoDTO dto) {
+        var bloqueo = codigoVerificacionService.consultarBloqueo(dto.getEmail());
+        if (bloqueo.bloqueado()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
+                    "error", "Cuenta bloqueada temporalmente por intentos fallidos.",
+                    "segundosRestantes", bloqueo.segundosRestantes()
+            ));
+        }
+
+        codigoVerificacionService.solicitarCodigo(dto.getEmail());
+        // Mensaje genérico: no confirmamos si el correo existe o no (seguridad)
         return ResponseEntity.ok(Map.of(
-                "message", "Si el email existe, recibirás instrucciones para recuperar tu contraseña",
-                "sent", sent
+                "message", "Si el correo está registrado, recibirás un código de verificación."
         ));
     }
 
-    @PostMapping("/api/auth/reset-password")
+    @PostMapping("/api/auth/verificar-codigo")
     @ResponseBody
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
-        boolean success = passwordResetService.resetPassword(dto.getToken(), dto.getNewPassword());
-        if (success) {
-            return ResponseEntity.ok(Map.of("message", "Contraseña actualizada correctamente"));
+    public ResponseEntity<?> verificarCodigo(@Valid @RequestBody VerificarCodigoDTO dto) {
+        var resultado = codigoVerificacionService.verificarCodigo(dto.getEmail(), dto.getCodigo());
+
+        if (resultado.isBloqueado()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
+                    "error", resultado.getMensaje(),
+                    "segundosRestantes", resultado.getSegundosBloqueo()
+            ));
         }
-        return ResponseEntity.badRequest().body(Map.of("error", "Token inválido o expirado"));
+        if (!resultado.isExito()) {
+            return ResponseEntity.badRequest().body(Map.of("error", resultado.getMensaje()));
+        }
+        return ResponseEntity.ok(Map.of("message", "Código verificado correctamente"));
+    }
+
+    @PostMapping("/api/auth/cambiar-password")
+    @ResponseBody
+    public ResponseEntity<?> cambiarPassword(@Valid @RequestBody CambiarPasswordConCodigoDTO dto) {
+        var resultado = codigoVerificacionService.cambiarPasswordConCodigo(
+                dto.getEmail(), dto.getCodigo(), dto.getNuevaPassword());
+
+        if (resultado.isBloqueado()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
+                    "error", resultado.getMensaje(),
+                    "segundosRestantes", resultado.getSegundosBloqueo()
+            ));
+        }
+        if (!resultado.isExito()) {
+            return ResponseEntity.badRequest().body(Map.of("error", resultado.getMensaje()));
+        }
+        return ResponseEntity.ok(Map.of("message", "Contraseña actualizada correctamente"));
     }
 }

@@ -1,3 +1,4 @@
+com\example\semana07\dto\SolicitarCodigoDTO.class
 com\example\semana07\service\LogoService.class
 com\example\semana07\controller\DashboardController.class
 com\example\semana07\service\EmailService.class
@@ -5,11 +6,13 @@ com\example\semana07\entity\Arte.class
 com\example\semana07\security\UsuarioPrincipal.class
 com\example\semana07\controller\LogoController.class
 com\example\semana07\dto\ResetPasswordDTO.class
+com\example\semana07\dto\VerificarCodigoDTO.class
 com\example\semana07\controller\VideoController.class
 com\example\semana07\entity\Personaje.class
 com\example\semana07\entity\Reporte.class
 com\example\semana07\entity\HistorialAccion.class
 com\example\semana07\service\UsuarioService.class
+com\example\semana07\service\CodigoVerificacionService.class
 com\example\semana07\controller\HistorialController.class
 com\example\semana07\entity\SliderImage.class
 com\example\semana07\config\SecurityBeansConfig.class
@@ -23,6 +26,7 @@ com\example\semana07\controller\AuthController.class
 com\example\semana07\dto\ForgotPasswordDTO.class
 com\example\semana07\controller\ExportController.class
 com\example\semana07\controller\NotificacionController.class
+com\example\semana07\dto\CambiarPasswordConCodigoDTO.class
 com\example\semana07\DataInitializer.class
 com\example\semana07\exception\GlobalExceptionHandler.class
 com\example\semana07\repository\UsuarioRepository.class
@@ -31,6 +35,7 @@ com\example\semana07\service\HistorialService.class
 com\example\semana07\Semana07Application.class
 com\example\semana07\exception\UnauthorizedException.class
 com\example\semana07\entity\Notificacion.class
+com\example\semana07\repository\InfoSitioRepository.class
 com\example\semana07\service\CloudStorageService.class
 com\example\semana07\dto\ComentarioCreateDTO.class
 com\example\semana07\repository\HistorialAccionRepository.class
@@ -51,12 +56,16 @@ com\example\semana07\controller\LikeContenidoController.class
 com\example\semana07\dto\UsuarioUpdateDTO.class
 com\example\semana07\entity\PasswordResetToken.class
 com\example\semana07\dto\UsuarioCreateDTO.class
+com\example\semana07\controller\InfoSitioController.class
 com\example\semana07\service\AnalyticsService.class
 com\example\semana07\repository\LikeContenidoRepository.class
+com\example\semana07\service\CodigoVerificacionService$EstadoBloqueo.class
 com\example\semana07\controller\ComentarioController.class
+com\example\semana07\entity\InfoSitio.class
 com\example\semana07\entity\LikeContenido.class
 com\example\semana07\service\SliderImageService.class
 com\example\semana07\controller\ArteController.class
+com\example\semana07\repository\CodigoVerificacionRepository.class
 com\example\semana07\service\ComentarioService.class
 com\example\semana07\service\LikeContenidoService.class
 com\example\semana07\repository\VideoRepository.class
@@ -67,8 +76,11 @@ com\example\semana07\repository\ReporteRepository.class
 com\example\semana07\repository\ArteRepository.class
 com\example\semana07\controller\TestController.class
 com\example\semana07\controller\SliderController.class
+com\example\semana07\service\InfoSitioService.class
+com\example\semana07\entity\CodigoVerificacion.class
 com\example\semana07\service\ReporteService.class
 com\example\semana07\controller\AnalyticsController.class
 com\example\semana07\service\ArteService.class
+com\example\semana07\service\CodigoVerificacionService$ResultadoVerificacion.class
 com\example\semana07\repository\LogoRepository.class
 com\example\semana07\security\LoginSuccessHandler.class
