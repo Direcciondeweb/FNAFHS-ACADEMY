@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear cuenta - FNAFHS ACADEMY</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+</head>
+<body class="auth-body">
+
+<div class="auth-container">
+    <a th:href="@{/}" class="auth-brand">★ FNAFHS <i class="fa-solid fa-book"></i> ACADEMY ★</a>
+
+    <!-- ============ FORMULARIO DE REGISTRO ============ -->
+    <div class="auth-card" id="registro-card">
+        <h2 class="auth-title">Crear cuenta</h2>
+        <p class="auth-subtitle">Únete a la comunidad de FNAFHS Academy</p>
+
+        <div id="registro-alert" class="auth-alert hidden"></div>
+
+        <form id="form-registro" class="auth-form" novalidate>
+            <div class="form-group">
+                <label for="reg-username">Usuario</label>
+                <input type="text" id="reg-username" minlength="3" maxlength="50" required autocomplete="username">
+                <span class="field-error" id="err-username"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-nombre">Nombre completo</label>
+                <input type="text" id="reg-nombre" required autocomplete="name">
+                <span class="field-error" id="err-nombre"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-email">Correo electrónico</label>
+                <input type="email" id="reg-email" required autocomplete="email">
+                <span class="field-error" id="err-email"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-password">Contraseña</label>
+                <div class="password-wrapper">
+                    <input type="password" id="reg-password" minlength="6" required autocomplete="new-password">
+                    <button type="button" class="toggle-password" data-target="reg-password">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                <span class="field-hint">Mínimo 6 caracteres</span>
+                <span class="field-error" id="err-password"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-confirmar">Confirmar contraseña</label>
+                <div class="password-wrapper">
+                    <input type="password" id="reg-confirmar" minlength="6" required autocomplete="new-password">
+                    <button type="button" class="toggle-password" data-target="reg-confirmar">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                <span class="field-error" id="err-confirmar"></span>
+            </div>
+
+            <button type="submit" class="auth-submit-btn" id="btn-registrar">Crear cuenta</button>
+        </form>
+
+        <div class="auth-links">
+            <a th:href="@{/login}">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+    </div>
+
+    <!-- ============ ÉXITO ============ -->
+    <div class="auth-card hidden" id="registro-exito">
+        <div class="auth-success-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h2 class="auth-title">¡Cuenta creada!</h2>
+        <p class="auth-subtitle">Revisa tu correo, te enviamos un mensaje de bienvenida. Ya puedes iniciar sesión.</p>
+        <a th:href="@{/login}" class="auth-submit-btn auth-submit-link">Ir a iniciar sesión</a>
+    </div>
+</div>
+
+<script th:src="@{/js/registro.js}"></script>
+</body>
+</html>

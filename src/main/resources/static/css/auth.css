@@ -186,3 +186,21 @@
 .auth-submit-link {
   margin-top: 10px;
 }
+.field-error {
+  display: block;
+  color: #ff8080;
+  font-size: 12px;
+  margin-top: 5px;
+  min-height: 14px;
+}
+
+.field-hint {
+  display: block;
+  color: rgba(246,239,235,0.5);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.form-group input.input-error {
+  border-color: var(--borgoña);
+}
