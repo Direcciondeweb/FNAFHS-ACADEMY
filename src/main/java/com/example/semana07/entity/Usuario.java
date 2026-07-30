@@ -41,8 +41,12 @@ public class Usuario {
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "usuario_permisos", joinColumns = @JoinColumn(name = "usuario_id"))
-    @Column(name = "permiso")
+    @CollectionTable(
+            name = "usuario_permisos",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"usuario_id", "permiso"})
+    )
+    @Column(name = "permiso", nullable = false)
     private Set<String> permisos = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.EAGER)

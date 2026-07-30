@@ -34,6 +34,7 @@ public class Personaje {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "personaje_galeria", joinColumns = @JoinColumn(name = "personaje_id"))
+    @OrderColumn(name = "posicion")
     @Column(name = "galeria_url")
     private List<String> galeriaImagenes = new ArrayList<>();
 
