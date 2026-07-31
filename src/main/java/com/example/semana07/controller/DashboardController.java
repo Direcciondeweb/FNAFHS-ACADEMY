@@ -40,9 +40,4 @@ public class DashboardController {
     public String descartados() {
         return "descartados";
     }
-
-    @GetMapping("/registro")
-    public String registro() {
-        return "registro";
-    }
 }
