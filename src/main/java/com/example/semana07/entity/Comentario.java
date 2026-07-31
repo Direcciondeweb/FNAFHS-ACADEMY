@@ -12,7 +12,7 @@ public class Comentario {
     private Long id;
 
     @Column(nullable = false, length = 20)
-    private String contenidoTipo; // ARTE, VIDEO, PERSONAJE
+    private String contenidoTipo;
 
     @Column(nullable = false)
     private Long contenidoId;
@@ -24,6 +24,8 @@ public class Comentario {
     private String texto;
 
     private boolean aprobado = true;
+    private boolean fijado = false;
+    private boolean censurado = false;
 
     private LocalDateTime fecha = LocalDateTime.now();
 
@@ -41,6 +43,10 @@ public class Comentario {
     public void setTexto(String texto) { this.texto = texto; }
     public boolean isAprobado() { return aprobado; }
     public void setAprobado(boolean aprobado) { this.aprobado = aprobado; }
+    public boolean isFijado() { return fijado; }
+    public void setFijado(boolean fijado) { this.fijado = fijado; }
+    public boolean isCensurado() { return censurado; }
+    public void setCensurado(boolean censurado) { this.censurado = censurado; }
     public LocalDateTime getFecha() { return fecha; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 }

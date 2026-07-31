@@ -55,7 +55,8 @@ public class SecurityConfig {
 
                         // Administración
                         .requestMatchers("/dashboard/admin/**", "/admin/**", "/api/admin/**", "/api/usuarios/**",
-                                "/api/historial/**", "/api/exportar/**", "/api/reportes/admin/**").hasRole("ADMIN")
+                                "/api/historial/**", "/api/exportar/**", "/api/reportes/admin/**",
+                                "/api/analytics/**", "/api/comentarios/admin/**").hasRole("ADMIN")
                         .requestMatchers("/dashboard/subadmin/**").hasAnyRole("ADMIN", "SUBADMIN")
                         .requestMatchers("/dashboard/**", "/user/**").authenticated()
 

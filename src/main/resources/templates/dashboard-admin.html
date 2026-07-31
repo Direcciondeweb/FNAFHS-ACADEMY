@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - FNAFHS ACADEMY</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+
+<div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <a th:href="@{/}" class="admin-brand">★ FNAFHS ACADEMY</a>
+        <p class="admin-role">Panel de <span sec:authentication="principal.usuario.rol">ADMIN</span></p>
+
+        <nav class="admin-nav">
+            <button class="admin-tab-btn active" data-tab="tab-dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+            <button class="admin-tab-btn" data-tab="tab-personajes"><i class="fa-solid fa-user"></i> Personajes</button>
+            <button class="admin-tab-btn" data-tab="tab-arte"><i class="fa-solid fa-palette"></i> Arte / Fanarts</button>
+            <button class="admin-tab-btn" data-tab="tab-videos"><i class="fa-solid fa-film"></i> Videos</button>
+            <button class="admin-tab-btn" data-tab="tab-comics"><i class="fa-solid fa-book-open"></i> Comics</button>
+            <button class="admin-tab-btn" data-tab="tab-descartados"><i class="fa-solid fa-trash"></i> Descartados</button>
+            <button class="admin-tab-btn" data-tab="tab-reportes"><i class="fa-solid fa-flag"></i> Reportes</button>
+            <button class="admin-tab-btn" data-tab="tab-comentarios"><i class="fa-solid fa-comments"></i> Comentarios</button>
+            <button class="admin-tab-btn" data-tab="tab-usuarios"><i class="fa-solid fa-users"></i> Usuarios</button>
+            <button class="admin-tab-btn" data-tab="tab-carrusel"><i class="fa-solid fa-images"></i> Carrusel</button>
+            <button class="admin-tab-btn" data-tab="tab-info"><i class="fa-solid fa-circle-info"></i> Visión / Misión</button>
+            <button class="admin-tab-btn" data-tab="tab-historial"><i class="fa-solid fa-clock-rotate-left"></i> Historial</button>
+        </nav>
+
+        <a th:href="@{/logout}" class="admin-logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="admin-main">
+
+        <!-- ===================== DASHBOARD ===================== -->
+        <section class="admin-tab-content active" id="tab-dashboard">
+            <h1 class="admin-page-title">Dashboard General</h1>
+
+            <div class="stats-grid" id="stats-grid"></div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Contenido por categoría</h3>
+                    <canvas id="chart-contenido"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Usuarios por rol</h3>
+                    <canvas id="chart-usuarios"></canvas>
+                </div>
+            </div>
+
+            <div class="admin-panel-box">
+                <h3>Últimas acciones del sistema</h3>
+                <div id="ultimas-acciones-list"></div>
+            </div>
+        </section>
+
+        <!-- ===================== PERSONAJES ===================== -->
+        <section class="admin-tab-content" id="tab-personajes">
+            <h1 class="admin-page-title">Gestión de Personajes</h1>
+
+            <form id="form-personaje" class="admin-form" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group"><label>Nombre</label><input type="text" id="p-nombre" required></div>
+                    <div class="form-group"><label>Categoría</label><input type="text" id="p-categoria" required></div>
+                </div>
+                <div class="form-group"><label>Descripción</label><textarea id="p-descripcion" rows="2"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Imagen (versión Academy)</label><input type="file" id="p-imagen" accept="image/*"></div>
+                    <div class="form-group"><label>Imagen original (referencia FNAF)</label><input type="file" id="p-imagen-original" accept="image/*"></div>
+                </div>
+                <button type="submit" class="admin-btn-primary">Publicar personaje</button>
+            </form>
+
+            <div class="admin-grid" id="personajes-admin-grid"></div>
+        </section>
+
+        <!-- ===================== ARTE / FANARTS ===================== -->
+        <section class="admin-tab-content" id="tab-arte">
+            <h1 class="admin-page-title">Arte Oficial y Fanarts</h1>
+
+            <form id="form-arte" class="admin-form" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group"><label>Título</label><input type="text" id="a-titulo" required></div>
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select id="a-tipo" required>
+                            <option value="arte-oficial">Arte Oficial</option>
+                            <option value="fanart">Fanart</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Imagen</label><input type="file" id="a-imagen" accept="image/*" required></div>
+                <button type="submit" class="admin-btn-primary">Publicar</button>
+            </form>
+
+            <div class="admin-filter-bar">
+                <button class="filter-chip active" data-filtro="arte-oficial">Arte Oficial</button>
+                <button class="filter-chip" data-filtro="fanart">Fanarts</button>
+            </div>
+
+            <div class="admin-grid" id="arte-admin-grid"></div>
+        </section>
+
+        <!-- ===================== VIDEOS ===================== -->
+        <section class="admin-tab-content" id="tab-videos">
+            <h1 class="admin-page-title">Gestión de Videos</h1>
+
+            <form id="form-video" class="admin-form" enctype="multipart/form-data">
+                <div class="form-group"><label>Título</label><input type="text" id="v-titulo" required></div>
+                <div class="form-group"><label>Archivo de video</label><input type="file" id="v-archivo" accept="video/*" required></div>
+                <button type="submit" class="admin-btn-primary">Publicar video</button>
+            </form>
+
+            <div class="admin-grid" id="videos-admin-grid"></div>
+        </section>
+
+        <!-- ===================== COMICS (multi-imagen, un solo ID) ===================== -->
+        <section class="admin-tab-content" id="tab-comics">
+            <h1 class="admin-page-title">Gestión de Comics</h1>
+            <p class="admin-hint">Un comic puede tener varias páginas. Usa el mismo "ID de comic" para agrupar todas las imágenes de un mismo número.</p>
+
+            <form id="form-comic" class="admin-form" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group"><label>Título de la página</label><input type="text" id="c-titulo" required></div>
+                    <div class="form-group"><label>ID de comic (agrupa páginas)</label><input type="text" id="c-comicid" placeholder="ej: comic-01" required></div>
+                </div>
+                <div class="form-group"><label>Página (imagen)</label><input type="file" id="c-imagen" accept="image/*" required></div>
+                <button type="submit" class="admin-btn-primary">Agregar página</button>
+            </form>
+
+            <div class="admin-panel-box">
+                <h3>Comics existentes (agrupados)</h3>
+                <div id="comics-admin-list"></div>
+            </div>
+        </section>
+
+        <!-- ===================== DESCARTADOS ===================== -->
+        <section class="admin-tab-content" id="tab-descartados">
+            <h1 class="admin-page-title">Material Descartado</h1>
+
+            <form id="form-descartado" class="admin-form" enctype="multipart/form-data">
+                <div class="form-group"><label>Título</label><input type="text" id="d-titulo" required></div>
+                <div class="form-group"><label>Imagen</label><input type="file" id="d-imagen" accept="image/*" required></div>
+                <button type="submit" class="admin-btn-primary">Publicar como descartado</button>
+            </form>
+
+            <div class="admin-grid" id="descartados-admin-grid"></div>
+        </section>
+
+        <!-- ===================== REPORTES ===================== -->
+        <section class="admin-tab-content" id="tab-reportes">
+            <h1 class="admin-page-title">Reportes de Contenido</h1>
+
+            <div class="admin-filter-bar">
+                <button class="filter-chip active" data-filtro-reporte="PENDIENTE">Pendientes</button>
+                <button class="filter-chip" data-filtro-reporte="TODOS">Todos</button>
+            </div>
+
+            <div id="reportes-list" class="admin-list"></div>
+        </section>
+
+        <!-- ===================== COMENTARIOS ===================== -->
+        <section class="admin-tab-content" id="tab-comentarios">
+            <h1 class="admin-page-title">Moderación de Comentarios</h1>
+            <div id="comentarios-admin-list" class="admin-list"></div>
+        </section>
+
+        <!-- ===================== USUARIOS ===================== -->
+        <section class="admin-tab-content" id="tab-usuarios">
+            <h1 class="admin-page-title">Usuarios Registrados</h1>
+            <table class="admin-table" id="usuarios-table">
+                <thead>
+                <tr><th>Usuario</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="usuarios-tbody"></tbody>
+            </table>
+        </section>
+
+        <!-- ===================== CARRUSEL ===================== -->
+        <section class="admin-tab-content" id="tab-carrusel">
+            <h1 class="admin-page-title">Imágenes del Carrusel</h1>
+
+            <form id="form-slider" class="admin-form" enctype="multipart/form-data">
+                <div class="form-group"><label>Nueva imagen del carrusel</label><input type="file" id="s-imagen" accept="image/*" required></div>
+                <button type="submit" class="admin-btn-primary">Subir imagen</button>
+            </form>
+
+            <div class="admin-grid" id="slider-admin-grid"></div>
+        </section>
+
+        <!-- ===================== VISION / MISION ===================== -->
+        <section class="admin-tab-content" id="tab-info">
+            <h1 class="admin-page-title">Visión y Misión</h1>
+            <form id="form-info" class="admin-form">
+                <div class="form-group"><label>Visión</label><textarea id="info-vision-input" rows="4"></textarea></div>
+                <div class="form-group"><label>Misión</label><textarea id="info-mision-input" rows="4"></textarea></div>
+                <button type="submit" class="admin-btn-primary">Guardar cambios</button>
+            </form>
+        </section>
+
+        <!-- ===================== HISTORIAL ===================== -->
+        <section class="admin-tab-content" id="tab-historial">
+            <h1 class="admin-page-title">Historial de Acciones</h1>
+            <table class="admin-table">
+                <thead><tr><th>Fecha</th><th>Usuario</th><th>Rol</th><th>Acción</th><th>Entidad</th><th>Detalle</th></tr></thead>
+                <tbody id="historial-tbody"></tbody>
+            </table>
+        </section>
+
+    </main>
+</div>
+
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/analytics")
-@CrossOrigin(origins = "*")
 public class AnalyticsController {
 
     @Autowired
@@ -16,5 +15,10 @@ public class AnalyticsController {
     @GetMapping("/dashboard")
     public ResponseEntity<?> dashboard() {
         return ResponseEntity.ok(analyticsService.dashboardStats());
+    }
+
+    @GetMapping("/top-contenido")
+    public ResponseEntity<?> topContenido(@RequestParam(defaultValue = "10") int limite) {
+        return ResponseEntity.ok(analyticsService.topContenidoPorLikes(limite));
     }
 }

@@ -24,7 +24,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRol("ADMIN");
             admin.setNombreCompleto("Administrador");
-            admin.setEmail("admin@gmail.com");
+            admin.setEmail("dianix970@gmail.com");
             admin.setEstado(1);
             usuarioRepository.save(admin);
 
@@ -33,20 +33,12 @@ public class DataInitializer implements CommandLineRunner {
             subadmin.setPassword(passwordEncoder.encode("subadmin123"));
             subadmin.setRol("SUBADMIN");
             subadmin.setNombreCompleto("Sub Administrador");
-            subadmin.setEmail("subadmin@gmail.com");
+            subadmin.setEmail("subadmin@fnafhsacademy.com");
             subadmin.setEstado(1);
             usuarioRepository.save(subadmin);
 
-            Usuario user = new Usuario();
-            user.setUsername("user");
-            user.setPassword(passwordEncoder.encode("user123"));
-            user.setRol("USER");
-            user.setNombreCompleto("Usuario Normal");
-            user.setEmail("usuario@gmail.com");
-            user.setEstado(1);
-            usuarioRepository.save(user);
-
-            System.out.println("✅ Usuarios por defecto creados");
+            System.out.println("✅ Usuario ADMIN creado por defecto: admin / admin123");
+            System.out.println("✅ Usuario SUBADMIN creado por defecto: subadmin / subadmin123");
         }
     }
 }
