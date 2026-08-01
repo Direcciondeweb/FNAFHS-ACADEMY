@@ -14,11 +14,12 @@
   padding: 25px 15px;
   display: flex;
   flex-direction: column;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   height: 100vh;
   overflow-y: auto;
-  flex-shrink: 0;
+  z-index: 200;
 }
 
 .admin-brand {
@@ -87,7 +88,8 @@
   flex: 1;
   padding: 30px 35px;
   overflow-y: auto;
-  max-width: calc(100% - 240px);
+  margin-left: 240px;
+  width: calc(100% - 240px);
 }
 
 .admin-tab-content { display: none; }
@@ -228,11 +230,13 @@
 
 .admin-btn-primary:hover { transform: translateY(-2px); }
 
-/* --- Filtros tipo chip --- */
+/* --- Filtros --- */
 .admin-filter-bar {
   display: flex;
   gap: 10px;
   margin-bottom: 18px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .filter-chip {
@@ -251,7 +255,16 @@
   color: #1a1a1a;
 }
 
-/* --- Grid de contenido admin (con botón eliminar) --- */
+.filtro-input {
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(208, 252, 11, 0.3);
+  background: #24202f;
+  color: white;
+  font-size: 13px;
+}
+
+/* --- Grid de contenido admin --- */
 .admin-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -302,6 +315,8 @@
 .btn-toggle { background: rgba(255,255,255,0.15); color: white; }
 
 /* --- Listas (reportes, comentarios) --- */
+.admin-list { display: block; }
+
 .admin-list-item {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(208, 252, 11, 0.15);
@@ -378,5 +393,5 @@
   .admin-sidebar { width: 70px; padding: 15px 8px; }
   .admin-brand, .admin-role, .admin-tab-btn span, .admin-logout span { display: none; }
   .admin-tab-btn { justify-content: center; padding: 12px; }
-  .admin-main { max-width: calc(100% - 70px); padding: 20px; }
+  .admin-main { margin-left: 70px; width: calc(100% - 70px); padding: 20px; }
 }

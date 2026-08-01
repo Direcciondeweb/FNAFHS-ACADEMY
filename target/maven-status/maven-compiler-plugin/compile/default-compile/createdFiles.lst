@@ -1,3 +1,4 @@
+com\example\semana07\dto\LoginPaso1DTO.class
 com\example\semana07\controller\DashboardController.class
 com\example\semana07\service\EmailService.class
 com\example\semana07\entity\Arte.class
@@ -15,6 +16,7 @@ com\example\semana07\dto\ForgotPasswordDTO.class
 com\example\semana07\controller\ExportController.class
 com\example\semana07\controller\NotificacionController.class
 com\example\semana07\dto\CambiarPasswordConCodigoDTO.class
+com\example\semana07\dto\LoginPaso2DTO.class
 com\example\semana07\exception\GlobalExceptionHandler.class
 com\example\semana07\service\HistorialService.class
 com\example\semana07\Semana07Application.class
@@ -44,6 +46,7 @@ com\example\semana07\dto\SolicitarCodigoDTO.class
 com\example\semana07\service\LogoService.class
 com\example\semana07\controller\LogoController.class
 com\example\semana07\dto\ResetPasswordDTO.class
+com\example\semana07\controller\LoginController.class
 com\example\semana07\entity\Personaje.class
 com\example\semana07\service\CodigoVerificacionService.class
 com\example\semana07\controller\HistorialController.class

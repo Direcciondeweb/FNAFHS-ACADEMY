@@ -7,6 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/main.css}">
     <link rel="stylesheet" th:href="@{/css/admin.css}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="admin-body">
 
@@ -17,21 +18,21 @@
         <p class="admin-role">Panel de <span sec:authentication="principal.usuario.rol">ADMIN</span></p>
 
         <nav class="admin-nav">
-            <button class="admin-tab-btn active" data-tab="tab-dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
-            <button class="admin-tab-btn" data-tab="tab-personajes"><i class="fa-solid fa-user"></i> Personajes</button>
-            <button class="admin-tab-btn" data-tab="tab-arte"><i class="fa-solid fa-palette"></i> Arte / Fanarts</button>
-            <button class="admin-tab-btn" data-tab="tab-videos"><i class="fa-solid fa-film"></i> Videos</button>
-            <button class="admin-tab-btn" data-tab="tab-comics"><i class="fa-solid fa-book-open"></i> Comics</button>
-            <button class="admin-tab-btn" data-tab="tab-descartados"><i class="fa-solid fa-trash"></i> Descartados</button>
-            <button class="admin-tab-btn" data-tab="tab-reportes"><i class="fa-solid fa-flag"></i> Reportes</button>
-            <button class="admin-tab-btn" data-tab="tab-comentarios"><i class="fa-solid fa-comments"></i> Comentarios</button>
-            <button class="admin-tab-btn" data-tab="tab-usuarios"><i class="fa-solid fa-users"></i> Usuarios</button>
-            <button class="admin-tab-btn" data-tab="tab-carrusel"><i class="fa-solid fa-images"></i> Carrusel</button>
-            <button class="admin-tab-btn" data-tab="tab-info"><i class="fa-solid fa-circle-info"></i> Visión / Misión</button>
-            <button class="admin-tab-btn" data-tab="tab-historial"><i class="fa-solid fa-clock-rotate-left"></i> Historial</button>
+            <button class="admin-tab-btn active" data-tab="tab-dashboard"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></button>
+            <button class="admin-tab-btn" data-tab="tab-personajes"><i class="fa-solid fa-user"></i> <span>Personajes</span></button>
+            <button class="admin-tab-btn" data-tab="tab-arte"><i class="fa-solid fa-palette"></i> <span>Arte / Fanarts</span></button>
+            <button class="admin-tab-btn" data-tab="tab-videos"><i class="fa-solid fa-film"></i> <span>Videos</span></button>
+            <button class="admin-tab-btn" data-tab="tab-comics"><i class="fa-solid fa-book-open"></i> <span>Comics</span></button>
+            <button class="admin-tab-btn" data-tab="tab-descartados"><i class="fa-solid fa-trash"></i> <span>Descartados</span></button>
+            <button class="admin-tab-btn" data-tab="tab-reportes"><i class="fa-solid fa-flag"></i> <span>Reportes</span></button>
+            <button class="admin-tab-btn" data-tab="tab-comentarios"><i class="fa-solid fa-comments"></i> <span>Comentarios</span></button>
+            <button class="admin-tab-btn" data-tab="tab-usuarios"><i class="fa-solid fa-users"></i> <span>Usuarios</span></button>
+            <button class="admin-tab-btn" data-tab="tab-carrusel"><i class="fa-solid fa-images"></i> <span>Carrusel</span></button>
+            <button class="admin-tab-btn" data-tab="tab-info"><i class="fa-solid fa-circle-info"></i> <span>Visión / Misión</span></button>
+            <button class="admin-tab-btn" data-tab="tab-historial"><i class="fa-solid fa-clock-rotate-left"></i> <span>Historial</span></button>
         </nav>
 
-        <a th:href="@{/logout}" class="admin-logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+        <a th:href="@{/logout}" class="admin-logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar sesión</span></a>
     </aside>
 
     <!-- Contenido principal -->
@@ -77,6 +78,13 @@
                 <button type="submit" class="admin-btn-primary">Publicar personaje</button>
             </form>
 
+            <div class="admin-filter-bar">
+                <input type="text" id="filtro-personaje-nombre" placeholder="Buscar por nombre..." class="filtro-input">
+                <select id="filtro-personaje-categoria" class="filtro-input">
+                    <option value="">Todas las categorías</option>
+                </select>
+            </div>
+
             <div class="admin-grid" id="personajes-admin-grid"></div>
         </section>
 
@@ -102,6 +110,7 @@
             <div class="admin-filter-bar">
                 <button class="filter-chip active" data-filtro="arte-oficial">Arte Oficial</button>
                 <button class="filter-chip" data-filtro="fanart">Fanarts</button>
+                <input type="text" id="filtro-arte-titulo" placeholder="Buscar por título..." class="filtro-input">
             </div>
 
             <div class="admin-grid" id="arte-admin-grid"></div>
@@ -117,10 +126,14 @@
                 <button type="submit" class="admin-btn-primary">Publicar video</button>
             </form>
 
+            <div class="admin-filter-bar">
+                <input type="text" id="filtro-video-titulo" placeholder="Buscar por título..." class="filtro-input">
+            </div>
+
             <div class="admin-grid" id="videos-admin-grid"></div>
         </section>
 
-        <!-- ===================== COMICS (multi-imagen, un solo ID) ===================== -->
+        <!-- ===================== COMICS ===================== -->
         <section class="admin-tab-content" id="tab-comics">
             <h1 class="admin-page-title">Gestión de Comics</h1>
             <p class="admin-hint">Un comic puede tener varias páginas. Usa el mismo "ID de comic" para agrupar todas las imágenes de un mismo número.</p>
@@ -133,6 +146,10 @@
                 <div class="form-group"><label>Página (imagen)</label><input type="file" id="c-imagen" accept="image/*" required></div>
                 <button type="submit" class="admin-btn-primary">Agregar página</button>
             </form>
+
+            <div class="admin-filter-bar">
+                <input type="text" id="filtro-comic-id" placeholder="Buscar por ID de comic..." class="filtro-input">
+            </div>
 
             <div class="admin-panel-box">
                 <h3>Comics existentes (agrupados)</h3>
@@ -150,6 +167,10 @@
                 <button type="submit" class="admin-btn-primary">Publicar como descartado</button>
             </form>
 
+            <div class="admin-filter-bar">
+                <input type="text" id="filtro-descartado-titulo" placeholder="Buscar por título..." class="filtro-input">
+            </div>
+
             <div class="admin-grid" id="descartados-admin-grid"></div>
         </section>
 
@@ -160,6 +181,13 @@
             <div class="admin-filter-bar">
                 <button class="filter-chip active" data-filtro-reporte="PENDIENTE">Pendientes</button>
                 <button class="filter-chip" data-filtro-reporte="TODOS">Todos</button>
+                <select id="filtro-reporte-tipo" class="filtro-input">
+                    <option value="">Todos los tipos</option>
+                    <option value="ARTE">Arte</option>
+                    <option value="VIDEO">Video</option>
+                    <option value="PERSONAJE">Personaje</option>
+                    <option value="COMENTARIO">Comentario</option>
+                </select>
             </div>
 
             <div id="reportes-list" class="admin-list"></div>
@@ -168,12 +196,44 @@
         <!-- ===================== COMENTARIOS ===================== -->
         <section class="admin-tab-content" id="tab-comentarios">
             <h1 class="admin-page-title">Moderación de Comentarios</h1>
+
+            <div class="admin-filter-bar">
+                <select id="filtro-comentario-tipo" class="filtro-input">
+                    <option value="">Todos los tipos</option>
+                    <option value="ARTE">Arte</option>
+                    <option value="VIDEO">Video</option>
+                    <option value="PERSONAJE">Personaje</option>
+                </select>
+                <select id="filtro-comentario-estado" class="filtro-input">
+                    <option value="">Todos</option>
+                    <option value="fijado">Solo fijados</option>
+                    <option value="censurado">Solo censurados</option>
+                </select>
+                <input type="text" id="filtro-comentario-usuario" placeholder="Buscar por usuario..." class="filtro-input">
+            </div>
+
             <div id="comentarios-admin-list" class="admin-list"></div>
         </section>
 
         <!-- ===================== USUARIOS ===================== -->
         <section class="admin-tab-content" id="tab-usuarios">
             <h1 class="admin-page-title">Usuarios Registrados</h1>
+
+            <div class="admin-filter-bar">
+                <input type="text" id="filtro-usuario-nombre" placeholder="Buscar usuario..." class="filtro-input">
+                <select id="filtro-usuario-rol" class="filtro-input">
+                    <option value="">Todos los roles</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="SUBADMIN">Subadmin</option>
+                    <option value="USER">Usuario</option>
+                </select>
+                <select id="filtro-usuario-estado" class="filtro-input">
+                    <option value="">Todos los estados</option>
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
+            </div>
+
             <table class="admin-table" id="usuarios-table">
                 <thead>
                 <tr><th>Usuario</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr>
@@ -191,6 +251,11 @@
                 <button type="submit" class="admin-btn-primary">Subir imagen</button>
             </form>
 
+            <div class="admin-filter-bar">
+                <button class="filter-chip active" data-filtro-slider="todas">Todas</button>
+                <button class="filter-chip" data-filtro-slider="activas">Solo activas</button>
+            </div>
+
             <div class="admin-grid" id="slider-admin-grid"></div>
         </section>
 
@@ -207,6 +272,14 @@
         <!-- ===================== HISTORIAL ===================== -->
         <section class="admin-tab-content" id="tab-historial">
             <h1 class="admin-page-title">Historial de Acciones</h1>
+
+            <div class="admin-filter-bar">
+                <input type="text" id="filtro-historial-usuario" placeholder="Filtrar por usuario..." class="filtro-input">
+                <input type="text" id="filtro-historial-entidad" placeholder="Filtrar por entidad (Arte, Video...)..." class="filtro-input">
+                <button class="admin-btn-primary" id="btn-aplicar-filtro-historial" style="align-self:auto; padding:9px 20px;">Buscar</button>
+                <button class="admin-btn-primary" id="btn-limpiar-filtro-historial" style="align-self:auto; padding:9px 20px; background: rgba(255,255,255,0.15);">Limpiar</button>
+            </div>
+
             <table class="admin-table">
                 <thead><tr><th>Fecha</th><th>Usuario</th><th>Rol</th><th>Acción</th><th>Entidad</th><th>Detalle</th></tr></thead>
                 <tbody id="historial-tbody"></tbody>

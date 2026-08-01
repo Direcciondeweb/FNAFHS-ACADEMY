@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const cards = {
         login: document.getElementById('login-card'),
+        loginCodigo: document.getElementById('step-login-codigo'),
         email: document.getElementById('step-email'),
         codigo: document.getElementById('step-codigo'),
         password: document.getElementById('step-nueva-password'),
@@ -8,11 +9,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let emailActual = '';
+    let usernameActual = '';
     let cooldownInterval = null;
 
     function mostrar(paso) {
         Object.values(cards).forEach(c => c.classList.add('hidden'));
         cards[paso].classList.remove('hidden');
+    }
+
+    function alertaError(mensaje) {
+        Swal.fire({ icon: 'error', title: 'Ups...', text: mensaje, background: '#1a1a1a', color: '#F6EFEB', confirmButtonColor: '#fd0000' });
+    }
+    function alertaExito(mensaje) {
+        Swal.fire({ icon: 'success', title: '¡Listo!', text: mensaje, background: '#1a1a1a', color: '#F6EFEB', confirmButtonColor: '#d0fc0b' });
     }
 
     // ---- Mostrar/ocultar contraseña ----
@@ -30,26 +39,115 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ---- Navegación entre pasos ----
-    document.getElementById('link-olvide-password')?.addEventListener('click', (e) => {
+    // ================= LOGIN PASO 1 =================
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
         e.preventDefault();
-        mostrar('email');
+        usernameActual = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const btn = document.getElementById('btn-login-paso1');
+
+        btn.disabled = true;
+        btn.textContent = 'Verificando...';
+
+        try {
+            const res = await fetch('/api/auth/login-paso1', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: usernameActual, password })
+            });
+            const data = await res.json();
+
+            if (res.status === 429) {
+                alertaError(data.error);
+                return;
+            }
+            if (!res.ok) {
+                alertaError(data.error || 'No se pudo iniciar sesión.');
+                return;
+            }
+
+            document.getElementById('login-email-oculto').textContent = data.emailOculto;
+            mostrar('loginCodigo');
+        } catch (err) {
+            alertaError('Error de conexión. Intenta de nuevo.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Continuar';
+        }
     });
-    document.getElementById('link-volver-login-1')?.addEventListener('click', (e) => {
+
+    // ================= LOGIN PASO 2 =================
+    document.getElementById('form-login-codigo').addEventListener('submit', async (e) => {
         e.preventDefault();
-        mostrar('login');
+        const codigo = document.getElementById('login-codigo-input').value.trim();
+        const btn = document.getElementById('btn-login-paso2');
+
+        btn.disabled = true;
+        btn.textContent = 'Ingresando...';
+
+        try {
+            const res = await fetch('/api/auth/login-paso2', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: usernameActual, codigo })
+            });
+            const data = await res.json();
+
+            if (res.status === 429) {
+                alertaError(data.error);
+                iniciarCooldown(data.segundosRestantes, 'login');
+                return;
+            }
+            if (!res.ok) {
+                alertaError(data.error);
+                return;
+            }
+
+            window.location.href = data.redirect;
+        } catch (err) {
+            alertaError('Error de conexión. Intenta de nuevo.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Ingresar';
+        }
     });
-    document.getElementById('link-volver-login-2')?.addEventListener('click', (e) => {
+
+    document.getElementById('link-reenviar-login').addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/auth/login-reenviar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: usernameActual, password: document.getElementById('password').value })
+            });
+            const data = await res.json();
+            if (res.status === 429) {
+                alertaError(data.error);
+                iniciarCooldown(data.segundosRestantes, 'login');
+                return;
+            }
+            alertaExito('Se envió un nuevo código a tu correo.');
+        } catch (err) {
+            alertaError('Error de conexión.');
+        }
+    });
+
+    document.getElementById('link-cancelar-login').addEventListener('click', (e) => {
         e.preventDefault();
         mostrar('login');
     });
 
-    // ---- Paso 1: solicitar código ----
-    document.getElementById('form-email')?.addEventListener('submit', async (e) => {
+    // ================= NAVEGACIÓN RECUPERACIÓN =================
+    document.getElementById('link-olvide-password').addEventListener('click', (e) => { e.preventDefault(); mostrar('email'); });
+    document.getElementById('link-volver-login-1').addEventListener('click', (e) => { e.preventDefault(); mostrar('login'); });
+    document.getElementById('link-volver-login-2').addEventListener('click', (e) => { e.preventDefault(); mostrar('login'); });
+    document.getElementById('link-volver-login-3').addEventListener('click', (e) => { e.preventDefault(); mostrar('login'); });
+
+    // ================= RECUPERACIÓN PASO 1 =================
+    document.getElementById('form-email').addEventListener('submit', async (e) => {
         e.preventDefault();
         emailActual = document.getElementById('recovery-email').value.trim();
         const btn = document.getElementById('btn-enviar-codigo');
-        const alertBox = document.getElementById('email-alert');
 
         btn.disabled = true;
         btn.textContent = 'Enviando...';
@@ -63,28 +161,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
 
             if (res.status === 429) {
-                mostrarAlerta(alertBox, data.error, 'error');
-                btn.disabled = false;
-                btn.textContent = 'Enviar código';
+                alertaError(data.error);
                 return;
             }
 
             document.getElementById('email-mostrado').textContent = emailActual;
             mostrar('codigo');
         } catch (err) {
-            mostrarAlerta(alertBox, 'Error de conexión. Intenta de nuevo.', 'error');
+            alertaError('Error de conexión. Intenta de nuevo.');
         } finally {
             btn.disabled = false;
             btn.textContent = 'Enviar código';
         }
     });
 
-    // ---- Paso 2: verificar código ----
-    document.getElementById('form-codigo')?.addEventListener('submit', async (e) => {
+    // ================= RECUPERACIÓN PASO 2 =================
+    document.getElementById('form-codigo').addEventListener('submit', async (e) => {
         e.preventDefault();
         const codigo = document.getElementById('codigo-input').value.trim();
         const btn = document.getElementById('btn-verificar-codigo');
-        const alertBox = document.getElementById('codigo-alert');
 
         btn.disabled = true;
         btn.textContent = 'Verificando...';
@@ -98,29 +193,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
 
             if (res.status === 429) {
-                mostrarAlerta(alertBox, data.error, 'error');
-                iniciarCooldown(data.segundosRestantes);
+                alertaError(data.error);
+                iniciarCooldown(data.segundosRestantes, 'recovery');
                 return;
             }
             if (!res.ok) {
-                mostrarAlerta(alertBox, data.error, 'error');
+                alertaError(data.error);
                 return;
             }
 
             mostrar('password');
         } catch (err) {
-            mostrarAlerta(alertBox, 'Error de conexión. Intenta de nuevo.', 'error');
+            alertaError('Error de conexión. Intenta de nuevo.');
         } finally {
             btn.disabled = false;
             btn.textContent = 'Verificar código';
         }
     });
 
-    // ---- Reenviar código (sin límite, disponible siempre que no esté bloqueado) ----
-    document.getElementById('link-reenviar-codigo')?.addEventListener('click', async (e) => {
+    document.getElementById('link-reenviar-codigo').addEventListener('click', async (e) => {
         e.preventDefault();
-        const alertBox = document.getElementById('codigo-alert');
-
         try {
             const res = await fetch('/api/auth/solicitar-codigo', {
                 method: 'POST',
@@ -128,29 +220,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email: emailActual })
             });
             const data = await res.json();
-
             if (res.status === 429) {
-                mostrarAlerta(alertBox, data.error, 'error');
-                iniciarCooldown(data.segundosRestantes);
+                alertaError(data.error);
+                iniciarCooldown(data.segundosRestantes, 'recovery');
                 return;
             }
-
-            mostrarAlerta(alertBox, 'Se envió un nuevo código a tu correo.', 'success');
+            alertaExito('Se envió un nuevo código a tu correo.');
         } catch (err) {
-            mostrarAlerta(alertBox, 'Error de conexión. Intenta de nuevo.', 'error');
+            alertaError('Error de conexión.');
         }
     });
 
-    // ---- Paso 3: cambiar contraseña ----
-    document.getElementById('form-nueva-password')?.addEventListener('submit', async (e) => {
+    // ================= RECUPERACIÓN PASO 3 =================
+    document.getElementById('form-nueva-password').addEventListener('submit', async (e) => {
         e.preventDefault();
         const nueva = document.getElementById('nueva-password').value;
         const confirmar = document.getElementById('confirmar-password').value;
-        const alertBox = document.getElementById('password-alert');
         const codigo = document.getElementById('codigo-input').value.trim();
 
         if (nueva !== confirmar) {
-            mostrarAlerta(alertBox, 'Las contraseñas no coinciden.', 'error');
+            alertaError('Las contraseñas no coinciden.');
             return;
         }
 
@@ -163,30 +252,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
 
             if (!res.ok) {
-                mostrarAlerta(alertBox, data.error, 'error');
+                alertaError(data.error);
                 return;
             }
 
             mostrar('exito');
         } catch (err) {
-            mostrarAlerta(alertBox, 'Error de conexión. Intenta de nuevo.', 'error');
+            alertaError('Error de conexión. Intenta de nuevo.');
         }
     });
 
-    function mostrarAlerta(elemento, mensaje, tipo) {
-        elemento.textContent = mensaje;
-        elemento.className = 'auth-alert auth-alert-' + tipo;
-        elemento.classList.remove('hidden');
-    }
+    function iniciarCooldown(segundos, contexto) {
+        const msg = contexto === 'login' ? document.getElementById('login-cooldown-msg') : document.getElementById('cooldown-msg');
+        const btn = contexto === 'login' ? document.getElementById('btn-login-paso2') : document.getElementById('btn-verificar-codigo');
 
-    function iniciarCooldown(segundos) {
-        const msg = document.getElementById('cooldown-msg');
-        const btnVerificar = document.getElementById('btn-verificar-codigo');
-        const linkReenviar = document.getElementById('link-reenviar-codigo');
-
-        btnVerificar.disabled = true;
-        linkReenviar.style.pointerEvents = 'none';
-        linkReenviar.style.opacity = '0.5';
+        btn.disabled = true;
         msg.classList.remove('hidden');
 
         let restante = segundos;
@@ -200,9 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (restante < 0) {
                 clearInterval(cooldownInterval);
                 msg.classList.add('hidden');
-                btnVerificar.disabled = false;
-                linkReenviar.style.pointerEvents = 'auto';
-                linkReenviar.style.opacity = '1';
+                btn.disabled = false;
             }
         }, 1000);
     }

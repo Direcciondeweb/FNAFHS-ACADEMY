@@ -6,34 +6,33 @@
     <title>Iniciar sesión - FNAFHS ACADEMY</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
     <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="auth-body">
 
 <div class="auth-container">
     <a th:href="@{/}" class="auth-brand">★ FNAFHS <i class="fa-solid fa-book"></i> ACADEMY ★</a>
 
-    <!-- ============ FORMULARIO DE LOGIN ============ -->
+    <!-- ============ PASO 1: USUARIO Y CONTRASEÑA ============ -->
     <div class="auth-card" id="login-card">
         <h2 class="auth-title">Iniciar sesión</h2>
+        <p class="auth-subtitle">Ingresa tus credenciales. Te enviaremos un código de verificación por correo.</p>
 
-        <div th:if="${error}" class="auth-alert auth-alert-error" th:text="${error}"></div>
-        <div th:if="${success}" class="auth-alert auth-alert-success" th:text="${success}"></div>
-
-        <form th:action="@{/login}" method="post" class="auth-form">
+        <form id="form-login" class="auth-form">
             <div class="form-group">
                 <label for="username">Usuario</label>
-                <input type="text" id="username" name="username" required autocomplete="username">
+                <input type="text" id="username" required autocomplete="username">
             </div>
             <div class="form-group">
                 <label for="password">Contraseña</label>
                 <div class="password-wrapper">
-                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                    <input type="password" id="password" required autocomplete="current-password">
                     <button type="button" class="toggle-password" data-target="password">
                         <i class="fa-regular fa-eye"></i>
                     </button>
                 </div>
             </div>
-            <button type="submit" class="auth-submit-btn">Ingresar</button>
+            <button type="submit" class="auth-submit-btn" id="btn-login-paso1">Continuar</button>
         </form>
 
         <div class="auth-links">
@@ -42,12 +41,34 @@
         </div>
     </div>
 
-    <!-- ============ PASO 1: SOLICITAR CÓDIGO (pedir el correo) ============ -->
+    <!-- ============ PASO 2: CÓDIGO DE VERIFICACIÓN DE LOGIN ============ -->
+    <div class="auth-card hidden" id="step-login-codigo">
+        <h2 class="auth-title">Verifica tu identidad</h2>
+        <p class="auth-subtitle">
+            Enviamos un código de 6 dígitos a <strong id="login-email-oculto"></strong>.
+            Válido por <strong>15 minutos</strong>.
+        </p>
+
+        <form id="form-login-codigo" class="auth-form">
+            <div class="form-group">
+                <label for="login-codigo-input">Código de verificación</label>
+                <input type="text" id="login-codigo-input" maxlength="6" inputmode="numeric" placeholder="000000" autocomplete="one-time-code" required>
+            </div>
+            <button type="submit" class="auth-submit-btn" id="btn-login-paso2">Ingresar</button>
+        </form>
+
+        <div class="auth-links">
+            <a href="#" id="link-reenviar-login">Reenviar código</a>
+            <a href="#" id="link-cancelar-login">Cancelar e ingresar de nuevo</a>
+        </div>
+
+        <p id="login-cooldown-msg" class="cooldown-msg hidden"></p>
+    </div>
+
+    <!-- ============ RECUPERAR CONTRASEÑA: PASO 1 ============ -->
     <div class="auth-card hidden" id="step-email">
         <h2 class="auth-title">Recuperar contraseña</h2>
         <p class="auth-subtitle">Ingresa el correo con el que te registraste. Te enviaremos un código de verificación.</p>
-
-        <div id="email-alert" class="auth-alert hidden"></div>
 
         <form id="form-email" class="auth-form">
             <div class="form-group">
@@ -62,15 +83,13 @@
         </div>
     </div>
 
-    <!-- ============ PASO 2: VERIFICAR CÓDIGO ============ -->
+    <!-- ============ RECUPERAR CONTRASEÑA: PASO 2 ============ -->
     <div class="auth-card hidden" id="step-codigo">
         <h2 class="auth-title">Verifica tu código</h2>
         <p class="auth-subtitle">
             Enviamos un código de 6 dígitos a <strong id="email-mostrado"></strong>.
-            El código es válido por <strong>15 minutos</strong>, sin límite de tiempo para pegarlo aquí.
+            Válido por <strong>15 minutos</strong>, sin límite de tiempo para pegarlo.
         </p>
-
-        <div id="codigo-alert" class="auth-alert hidden"></div>
 
         <form id="form-codigo" class="auth-form">
             <div class="form-group">
@@ -88,11 +107,9 @@
         <p id="cooldown-msg" class="cooldown-msg hidden"></p>
     </div>
 
-    <!-- ============ PASO 3: NUEVA CONTRASEÑA ============ -->
+    <!-- ============ RECUPERAR CONTRASEÑA: PASO 3 ============ -->
     <div class="auth-card hidden" id="step-nueva-password">
         <h2 class="auth-title">Crea tu nueva contraseña</h2>
-
-        <div id="password-alert" class="auth-alert hidden"></div>
 
         <form id="form-nueva-password" class="auth-form">
             <div class="form-group">
@@ -112,12 +129,12 @@
         </form>
     </div>
 
-    <!-- ============ PASO 4: ÉXITO ============ -->
+    <!-- ============ ÉXITO CAMBIO DE CONTRASEÑA ============ -->
     <div class="auth-card hidden" id="step-exito">
         <div class="auth-success-icon"><i class="fa-solid fa-circle-check"></i></div>
         <h2 class="auth-title">¡Contraseña actualizada!</h2>
         <p class="auth-subtitle">Ya puedes iniciar sesión con tu nueva contraseña.</p>
-        <a th:href="@{/login}" class="auth-submit-btn auth-submit-link">Ir a iniciar sesión</a>
+        <a href="#" id="link-volver-login-3" class="auth-submit-btn auth-submit-link">Ir a iniciar sesión</a>
     </div>
 </div>
 

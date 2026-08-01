@@ -1,5 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ---- Navegación entre pestañas ----
+
+    // ================= ALERTAS (SweetAlert2) =================
+    function alertaExito(mensaje) {
+        Swal.fire({ icon: 'success', title: '¡Listo!', text: mensaje, background: '#1a1a1a', color: '#F6EFEB', confirmButtonColor: '#d0fc0b', timer: 2000, showConfirmButton: false });
+    }
+    function alertaError(mensaje) {
+        Swal.fire({ icon: 'error', title: 'Ups...', text: mensaje, background: '#1a1a1a', color: '#F6EFEB', confirmButtonColor: '#fd0000' });
+    }
+    async function confirmarAccion(mensaje) {
+        const resultado = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: mensaje,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, continuar',
+            cancelButtonText: 'Cancelar',
+            background: '#1a1a1a', color: '#F6EFEB',
+            confirmButtonColor: '#fd0000', cancelButtonColor: 'rgba(255,255,255,0.2)'
+        });
+        return resultado.isConfirmed;
+    }
+    window.alertaExito = alertaExito;
+    window.alertaError = alertaError;
+    window.confirmarAccion = confirmarAccion;
+
+    window.eliminarItem = async (url, callback) => {
+        const ok = await confirmarAccion('Esta acción no se puede deshacer.');
+        if (!ok) return;
+        await fetch(url, { method: 'DELETE' });
+        alertaExito('Elemento eliminado');
+        callback();
+    };
+
+    // ================= NAVEGACIÓN ENTRE PESTAÑAS =================
     document.querySelectorAll('.admin-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
@@ -30,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ================= DASHBOARD =================
+    let chartContenido, chartUsuarios;
+
     async function cargarDashboard() {
         const res = await fetch('/api/analytics/dashboard');
         const data = await res.json();
@@ -56,16 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<div class="stat-card"><div class="stat-value">${valor}</div><div class="stat-label">${label}</div></div>`;
     }
 
-    let chartContenido, chartUsuarios;
     function dibujarGraficoBarras(canvasId, dataObj) {
         const ctx = document.getElementById(canvasId);
         if (chartContenido) chartContenido.destroy();
         chartContenido = new Chart(ctx, {
             type: 'bar',
-            data: {
-                labels: Object.keys(dataObj),
-                datasets: [{ data: Object.values(dataObj), backgroundColor: '#d0fc0b' }]
-            },
+            data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: '#d0fc0b' }] },
             options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
     }
@@ -75,14 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chartUsuarios) chartUsuarios.destroy();
         chartUsuarios = new Chart(ctx, {
             type: 'doughnut',
-            data: {
-                labels: Object.keys(dataObj),
-                datasets: [{ data: Object.values(dataObj), backgroundColor: ['#fd0000', '#a725bb', '#d0fc0b'] }]
-            }
+            data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: ['#fd0000', '#a725bb', '#d0fc0b'] }] }
         });
     }
 
     // ================= PERSONAJES =================
+    let personajesCache = [];
+
     document.getElementById('form-personaje').addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData();
@@ -96,12 +126,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await fetch('/api/personajes', { method: 'POST', body: fd });
         e.target.reset();
+        alertaExito('Personaje publicado');
         cargarPersonajes();
     });
 
     async function cargarPersonajes() {
         const res = await fetch('/api/personajes');
-        const lista = await res.json();
+        personajesCache = await res.json();
+
+        const categorias = [...new Set(personajesCache.map(p => p.categoria).filter(Boolean))];
+        const selectCat = document.getElementById('filtro-personaje-categoria');
+        selectCat.innerHTML = '<option value="">Todas las categorías</option>' +
+            categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+
+        renderPersonajes(personajesCache);
+    }
+    window.cargarPersonajes = cargarPersonajes;
+
+    function renderPersonajes(lista) {
         document.getElementById('personajes-admin-grid').innerHTML = lista.map(p => `
             <div class="admin-card">
                 <img src="${p.imagenUrl || ''}" alt="${p.nombre}">
@@ -110,11 +152,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn-delete" onclick="eliminarItem('/api/personajes/${p.id}', cargarPersonajes)">Eliminar</button>
                 </div>
             </div>
-        `).join('') || '<p style="opacity:.5">No hay personajes aún.</p>';
+        `).join('') || '<p style="opacity:.5">No hay personajes con ese filtro.</p>';
     }
-    window.cargarPersonajes = cargarPersonajes;
+
+    function aplicarFiltroPersonajes() {
+        const nombre = document.getElementById('filtro-personaje-nombre').value.toLowerCase();
+        const categoria = document.getElementById('filtro-personaje-categoria').value;
+        const filtrado = personajesCache.filter(p =>
+            p.nombre.toLowerCase().includes(nombre) && (!categoria || p.categoria === categoria)
+        );
+        renderPersonajes(filtrado);
+    }
+    document.getElementById('filtro-personaje-nombre')?.addEventListener('input', aplicarFiltroPersonajes);
+    document.getElementById('filtro-personaje-categoria')?.addEventListener('change', aplicarFiltroPersonajes);
 
     // ================= ARTE / FANARTS =================
+    let arteCache = [];
+
     document.getElementById('form-arte').addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData();
@@ -124,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await fetch('/api/arte', { method: 'POST', body: fd });
         e.target.reset();
+        alertaExito('Contenido publicado');
         cargarArte(document.querySelector('#tab-arte .filter-chip.active').dataset.filtro);
     });
 
@@ -137,7 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function cargarArte(tipo) {
         const res = await fetch(`/api/arte/tipo/${tipo}`);
-        const lista = await res.json();
+        arteCache = await res.json();
+        renderArte(arteCache, tipo);
+    }
+    window.cargarArte = cargarArte;
+
+    function renderArte(lista, tipo) {
         document.getElementById('arte-admin-grid').innerHTML = lista.map(a => `
             <div class="admin-card">
                 <img src="${a.imagenUrl}" alt="${a.titulo}">
@@ -148,9 +208,16 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `).join('') || '<p style="opacity:.5">Sin contenido en esta categoría.</p>';
     }
-    window.cargarArte = cargarArte;
+
+    document.getElementById('filtro-arte-titulo')?.addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase();
+        const tipo = document.querySelector('#tab-arte .filter-chip.active').dataset.filtro;
+        renderArte(arteCache.filter(a => a.titulo.toLowerCase().includes(texto)), tipo);
+    });
 
     // ================= VIDEOS =================
+    let videosCache = [];
+
     document.getElementById('form-video').addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData();
@@ -159,12 +226,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await fetch('/api/videos', { method: 'POST', body: fd });
         e.target.reset();
+        alertaExito('Video publicado');
         cargarVideos();
     });
 
     async function cargarVideos() {
         const res = await fetch('/api/videos');
-        const lista = await res.json();
+        videosCache = await res.json();
+        renderVideos(videosCache);
+    }
+    window.cargarVideos = cargarVideos;
+
+    function renderVideos(lista) {
         document.getElementById('videos-admin-grid').innerHTML = lista.map(v => `
             <div class="admin-card">
                 <video src="${v.videoUrl}" muted></video>
@@ -173,11 +246,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn-delete" onclick="eliminarItem('/api/videos/${v.id}', cargarVideos)">Eliminar</button>
                 </div>
             </div>
-        `).join('') || '<p style="opacity:.5">No hay videos aún.</p>';
+        `).join('') || '<p style="opacity:.5">No hay videos con ese filtro.</p>';
     }
-    window.cargarVideos = cargarVideos;
 
-    // ================= COMICS (tipo=comic, agrupado por comicId) =================
+    document.getElementById('filtro-video-titulo')?.addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase();
+        renderVideos(videosCache.filter(v => v.titulo.toLowerCase().includes(texto)));
+    });
+
+    // ================= COMICS =================
+    let comicsGruposCache = {};
+
     document.getElementById('form-comic').addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData();
@@ -188,19 +267,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await fetch('/api/arte', { method: 'POST', body: fd });
         e.target.reset();
+        alertaExito('Página agregada al comic');
         cargarComics();
     });
 
     async function cargarComics() {
         const res = await fetch('/api/arte/tipo/comic');
         const lista = await res.json();
-        const grupos = {};
+        comicsGruposCache = {};
         lista.forEach(pagina => {
             const key = pagina.comicId || 'sin-id';
-            if (!grupos[key]) grupos[key] = [];
-            grupos[key].push(pagina);
+            if (!comicsGruposCache[key]) comicsGruposCache[key] = [];
+            comicsGruposCache[key].push(pagina);
         });
+        renderComics(comicsGruposCache);
+    }
+    window.cargarComics = cargarComics;
 
+    function renderComics(grupos) {
         document.getElementById('comics-admin-list').innerHTML = Object.entries(grupos).map(([comicId, paginas]) => `
             <div class="admin-list-item">
                 <div class="item-meta">Comic: <b>${comicId}</b> — ${paginas.length} página(s)</div>
@@ -221,15 +305,26 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `).join('') || '<p style="opacity:.5">No hay comics aún.</p>';
     }
-    window.cargarComics = cargarComics;
+
+    document.getElementById('filtro-comic-id')?.addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase();
+        const filtrado = Object.fromEntries(
+            Object.entries(comicsGruposCache).filter(([id]) => id.toLowerCase().includes(texto))
+        );
+        renderComics(filtrado);
+    });
 
     window.eliminarComicCompleto = async (comicId) => {
-        if (!confirm('¿Eliminar todas las páginas de este comic?')) return;
+        const ok = await confirmarAccion('Se eliminarán todas las páginas de este comic.');
+        if (!ok) return;
         await fetch(`/api/arte/comic/${comicId}`, { method: 'DELETE' });
+        alertaExito('Comic eliminado');
         cargarComics();
     };
 
     // ================= DESCARTADOS =================
+    let descartadosCache = [];
+
     document.getElementById('form-descartado').addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData();
@@ -239,12 +334,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await fetch('/api/arte', { method: 'POST', body: fd });
         e.target.reset();
+        alertaExito('Publicado como descartado');
         cargarDescartados();
     });
 
     async function cargarDescartados() {
         const res = await fetch('/api/arte/tipo/descartado');
-        const lista = await res.json();
+        descartadosCache = await res.json();
+        renderDescartados(descartadosCache);
+    }
+    window.cargarDescartados = cargarDescartados;
+
+    function renderDescartados(lista) {
         document.getElementById('descartados-admin-grid').innerHTML = lista.map(d => `
             <div class="admin-card">
                 <img src="${d.imagenUrl}" alt="${d.titulo}">
@@ -255,9 +356,15 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `).join('') || '<p style="opacity:.5">No hay material descartado.</p>';
     }
-    window.cargarDescartados = cargarDescartados;
+
+    document.getElementById('filtro-descartado-titulo')?.addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase();
+        renderDescartados(descartadosCache.filter(d => d.titulo.toLowerCase().includes(texto)));
+    });
 
     // ================= REPORTES =================
+    let reportesCache = [];
+
     document.querySelectorAll('#tab-reportes .filter-chip').forEach(chip => {
         chip.addEventListener('click', () => {
             document.querySelectorAll('#tab-reportes .filter-chip').forEach(c => c.classList.remove('active'));
@@ -267,11 +374,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function cargarReportes(filtro) {
-        const url = filtro === 'PENDIENTE' ? '/api/reportes/admin/pendientes?size=50' : '/api/reportes/admin?size=50';
+        const url = filtro === 'PENDIENTE' ? '/api/reportes/admin/pendientes?size=100' : '/api/reportes/admin?size=100';
         const res = await fetch(url);
         const data = await res.json();
-        const lista = data.content || [];
+        reportesCache = data.content || [];
+        renderReportes(reportesCache);
+    }
 
+    function renderReportes(lista) {
         document.getElementById('reportes-list').innerHTML = lista.map(r => `
             <div class="admin-list-item">
                 <div class="item-meta">
@@ -289,21 +399,34 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('') || '<p style="opacity:.5">No hay reportes en esta vista.</p>';
     }
 
+    document.getElementById('filtro-reporte-tipo')?.addEventListener('change', (e) => {
+        const tipo = e.target.value;
+        renderReportes(tipo ? reportesCache.filter(r => r.contenidoTipo === tipo) : reportesCache);
+    });
+
     window.resolverReporte = async (id) => {
         await fetch(`/api/reportes/admin/${id}/resolver`, { method: 'PUT' });
+        alertaExito('Reporte resuelto');
         cargarReportes(document.querySelector('#tab-reportes .filter-chip.active').dataset.filtroReporte);
     };
     window.rechazarReporte = async (id) => {
         await fetch(`/api/reportes/admin/${id}/rechazar`, { method: 'PUT' });
+        alertaExito('Reporte rechazado');
         cargarReportes(document.querySelector('#tab-reportes .filter-chip.active').dataset.filtroReporte);
     };
 
     // ================= COMENTARIOS =================
-    async function cargarComentarios() {
-        const res = await fetch('/api/comentarios/admin/todos?size=50');
-        const data = await res.json();
-        const lista = data.content || [];
+    let comentariosCache = [];
 
+    async function cargarComentarios() {
+        const res = await fetch('/api/comentarios/admin/todos?size=100');
+        const data = await res.json();
+        comentariosCache = data.content || [];
+        renderComentarios(comentariosCache);
+    }
+    window.cargarComentarios = cargarComentarios;
+
+    function renderComentarios(lista) {
         document.getElementById('comentarios-admin-list').innerHTML = lista.map(c => `
             <div class="admin-list-item">
                 <div class="item-meta">
@@ -317,26 +440,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn-reject" onclick="eliminarComentario(${c.id})">Eliminar</button>
                 </div>
             </div>
-        `).join('') || '<p style="opacity:.5">No hay comentarios aún.</p>';
+        `).join('') || '<p style="opacity:.5">No hay comentarios con ese filtro.</p>';
     }
-    window.cargarComentarios = cargarComentarios;
+
+    function aplicarFiltroComentarios() {
+        const tipo = document.getElementById('filtro-comentario-tipo').value;
+        const estado = document.getElementById('filtro-comentario-estado').value;
+        const usuario = document.getElementById('filtro-comentario-usuario').value.toLowerCase();
+
+        const filtrado = comentariosCache.filter(c => {
+            if (tipo && c.contenidoTipo !== tipo) return false;
+            if (estado === 'fijado' && !c.fijado) return false;
+            if (estado === 'censurado' && !c.censurado) return false;
+            if (usuario && !c.usuario.toLowerCase().includes(usuario)) return false;
+            return true;
+        });
+        renderComentarios(filtrado);
+    }
+    document.getElementById('filtro-comentario-tipo')?.addEventListener('change', aplicarFiltroComentarios);
+    document.getElementById('filtro-comentario-estado')?.addEventListener('change', aplicarFiltroComentarios);
+    document.getElementById('filtro-comentario-usuario')?.addEventListener('input', aplicarFiltroComentarios);
 
     window.toggleComentario = async (id, accion, valor) => {
         await fetch(`/api/comentarios/admin/${id}/${accion}?valor=${valor}`, { method: 'PUT' });
         cargarComentarios();
     };
     window.eliminarComentario = async (id) => {
-        if (!confirm('¿Eliminar este comentario?')) return;
+        const ok = await confirmarAccion('Este comentario se eliminará permanentemente.');
+        if (!ok) return;
         await fetch(`/api/comentarios/admin/${id}`, { method: 'DELETE' });
+        alertaExito('Comentario eliminado');
         cargarComentarios();
     };
 
     // ================= USUARIOS =================
-    async function cargarUsuarios() {
-        const res = await fetch('/api/usuarios?size=100');
-        const data = await res.json();
-        const lista = data.content || [];
+    let usuariosCache = [];
 
+    async function cargarUsuarios() {
+        const res = await fetch('/api/usuarios?size=200');
+        const data = await res.json();
+        usuariosCache = data.content || [];
+        renderUsuarios(usuariosCache);
+    }
+    window.cargarUsuarios = cargarUsuarios;
+
+    function renderUsuarios(lista) {
         document.getElementById('usuarios-tbody').innerHTML = lista.map(u => `
             <tr>
                 <td>${u.username}</td>
@@ -358,24 +506,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${new Date(u.fechaRegistro).toLocaleDateString('es-PE')}</td>
                 <td><button class="btn-delete" onclick="eliminarUsuario(${u.id})">Eliminar</button></td>
             </tr>
-        `).join('');
+        `).join('') || '<tr><td colspan="7" style="opacity:.5">Sin usuarios con ese filtro.</td></tr>';
     }
-    window.cargarUsuarios = cargarUsuarios;
+
+    function aplicarFiltroUsuarios() {
+        const nombre = document.getElementById('filtro-usuario-nombre').value.toLowerCase();
+        const rol = document.getElementById('filtro-usuario-rol').value;
+        const estado = document.getElementById('filtro-usuario-estado').value;
+
+        const filtrado = usuariosCache.filter(u =>
+            u.username.toLowerCase().includes(nombre) &&
+            (!rol || u.rol === rol) &&
+            (estado === '' || String(u.estado) === estado)
+        );
+        renderUsuarios(filtrado);
+    }
+    document.getElementById('filtro-usuario-nombre')?.addEventListener('input', aplicarFiltroUsuarios);
+    document.getElementById('filtro-usuario-rol')?.addEventListener('change', aplicarFiltroUsuarios);
+    document.getElementById('filtro-usuario-estado')?.addEventListener('change', aplicarFiltroUsuarios);
 
     window.cambiarRol = async (id, rol) => {
         await fetch(`/api/usuarios/${id}/rol?rol=${rol}`, { method: 'PUT' });
+        alertaExito('Rol actualizado');
         cargarUsuarios();
     };
     window.cambiarEstado = async (id, estado) => {
         await fetch(`/api/usuarios/${id}/estado?estado=${estado}`, { method: 'PUT' });
+        alertaExito('Estado actualizado');
     };
     window.eliminarUsuario = async (id) => {
-        if (!confirm('¿Eliminar este usuario permanentemente?')) return;
+        const ok = await confirmarAccion('Este usuario se eliminará permanentemente.');
+        if (!ok) return;
         await fetch(`/api/usuarios/${id}`, { method: 'DELETE' });
+        alertaExito('Usuario eliminado');
         cargarUsuarios();
     };
 
     // ================= CARRUSEL =================
+    let sliderCache = [];
+
     document.getElementById('form-slider').addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData();
@@ -383,12 +552,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await fetch('/api/slider', { method: 'POST', body: fd });
         e.target.reset();
+        alertaExito('Imagen agregada al carrusel');
         cargarSlider();
+    });
+
+    document.querySelectorAll('#tab-carrusel .filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#tab-carrusel .filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            renderSlider(chip.dataset.filtroSlider === 'activas' ? sliderCache.filter(s => s.activo) : sliderCache);
+        });
     });
 
     async function cargarSlider() {
         const res = await fetch('/api/slider');
-        const lista = await res.json();
+        sliderCache = await res.json();
+        renderSlider(sliderCache);
+    }
+    window.cargarSlider = cargarSlider;
+
+    function renderSlider(lista) {
         document.getElementById('slider-admin-grid').innerHTML = lista.map(s => `
             <div class="admin-card">
                 <img src="${s.imagenUrl}" alt="Slider">
@@ -400,7 +583,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `).join('') || '<p style="opacity:.5">No hay imágenes en el carrusel.</p>';
     }
-    window.cargarSlider = cargarSlider;
 
     window.toggleSlider = async (id, activo) => {
         await fetch(`/api/slider/${id}/toggle?activo=${activo}`, { method: 'PUT' });
@@ -418,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mision: document.getElementById('info-mision-input').value
             })
         });
-        alert('Guardado correctamente');
+        alertaExito('Visión y Misión guardadas correctamente');
     });
 
     async function cargarInfo() {
@@ -431,10 +613,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ================= HISTORIAL =================
     async function cargarHistorial() {
-        const res = await fetch('/api/historial?size=50');
+        const res = await fetch('/api/historial?size=100');
         const data = await res.json();
-        const lista = data.content || [];
+        renderHistorial(data.content || []);
+    }
+    window.cargarHistorial = cargarHistorial;
 
+    function renderHistorial(lista) {
         document.getElementById('historial-tbody').innerHTML = lista.map(h => `
             <tr>
                 <td>${new Date(h.fecha).toLocaleString('es-PE')}</td>
@@ -444,14 +629,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${h.entidad}</td>
                 <td>${h.detalle || '-'}</td>
             </tr>
-        `).join('');
+        `).join('') || '<tr><td colspan="6" style="opacity:.5">Sin resultados.</td></tr>';
     }
-    window.cargarHistorial = cargarHistorial;
 
-    // ================= UTILIDAD GENERAL =================
-    window.eliminarItem = async (url, callback) => {
-        if (!confirm('¿Eliminar este elemento?')) return;
-        await fetch(url, { method: 'DELETE' });
-        callback();
-    };
+    document.getElementById('btn-aplicar-filtro-historial')?.addEventListener('click', async () => {
+        const usuario = document.getElementById('filtro-historial-usuario').value.trim();
+        const entidad = document.getElementById('filtro-historial-entidad').value.trim();
+
+        let url = '/api/historial?size=100';
+        if (usuario) url = `/api/historial/usuario/${usuario}`;
+        else if (entidad) url = `/api/historial/entidad/${entidad}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+        renderHistorial(Array.isArray(data) ? data : (data.content || []));
+    });
+
+    document.getElementById('btn-limpiar-filtro-historial')?.addEventListener('click', () => {
+        document.getElementById('filtro-historial-usuario').value = '';
+        document.getElementById('filtro-historial-entidad').value = '';
+        cargarHistorial();
+    });
+
 });
