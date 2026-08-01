@@ -16,7 +16,7 @@
     <!-- ============ PASO 1: USUARIO Y CONTRASEÑA ============ -->
     <div class="auth-card" id="login-card">
         <h2 class="auth-title">Iniciar sesión</h2>
-        <p class="auth-subtitle">Ingresa tus credenciales. Te enviaremos un código de verificación por correo.</p>
+        <p class="auth-subtitle">Ingresa tus credenciales. Luego confirmarás tu correo para recibir un código de verificación.</p>
 
         <form id="form-login" class="auth-form">
             <div class="form-group">
@@ -41,12 +41,29 @@
         </div>
     </div>
 
-    <!-- ============ PASO 2: CÓDIGO DE VERIFICACIÓN DE LOGIN ============ -->
+    <!-- ============ PASO 2: CONFIRMAR CORREO ============ -->
+    <div class="auth-card hidden" id="step-login-email">
+        <h2 class="auth-title">Confirma tu correo</h2>
+        <p class="auth-subtitle">Por seguridad, escribe el correo con el que registraste tu cuenta.</p>
+
+        <form id="form-login-email" class="auth-form">
+            <div class="form-group">
+                <label for="login-email-input">Correo electrónico</label>
+                <input type="email" id="login-email-input" required autocomplete="email">
+            </div>
+            <button type="submit" class="auth-submit-btn" id="btn-login-email">Enviar código</button>
+        </form>
+
+        <div class="auth-links">
+            <a href="#" id="link-cancelar-login-email">Cancelar e ingresar de nuevo</a>
+        </div>
+    </div>
+
+    <!-- ============ PASO 3: CÓDIGO DE VERIFICACIÓN DE LOGIN ============ -->
     <div class="auth-card hidden" id="step-login-codigo">
         <h2 class="auth-title">Verifica tu identidad</h2>
         <p class="auth-subtitle">
-            Enviamos un código de 6 dígitos a <strong id="login-email-oculto"></strong>.
-            Válido por <strong>15 minutos</strong>.
+            Enviamos un código de 6 dígitos a tu correo. Válido por <strong>15 minutos</strong>, sin límite de tiempo para pegarlo aquí.
         </p>
 
         <form id="form-login-codigo" class="auth-form">

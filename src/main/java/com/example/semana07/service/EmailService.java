@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,7 +20,7 @@ public class EmailService {
     @Value("${spring.mail.username:}")
     private String fromEmail;
 
-    public void sendEmail(String to, String subject, String body) {
+    private void sendEmail(String to, String subject, String body) {
         if (mailSender == null) {
             log.warn("Mail no configurado, no se envió el correo a: {}", to);
             return;
@@ -37,54 +38,43 @@ public class EmailService {
         }
     }
 
+    @Async
     public void sendWelcomeEmail(String to, String nombre) {
         String subject = "🌟 Bienvenido a FNAFHS Academy 🌟";
         String body = "¡Hola " + nombre + "!\n\n" +
                 "Te damos la bienvenida a FNAFHS Academy, la comunidad más grande de fans de FNAFHS.\n\n" +
-                "Aquí podrás:\n" +
-                "• Ver y compartir arte oficial y fanarts\n" +
-                "• Explorar la galería de personajes\n" +
-                "• Leer cómics exclusivos\n" +
-                "• Ver videos de la comunidad\n\n" +
-                "¡Explora y disfruta!\n\n" +
                 "★ FNAFHS ACADEMY ★";
         sendEmail(to, subject, body);
     }
 
+    @Async
     public void sendNewFanartNotification(String adminEmail, String titulo, String autor) {
         String subject = "🎨 Nuevo Fanart en FNAFHS Academy";
-        String body = "¡Se ha subido un nuevo fanart!\n\n" +
-                "Título: " + titulo + "\n" +
-                "Autor: " + autor + "\n\n" +
-                "Revisa el panel de administración para moderarlo.\n\n" +
-                "★ FNAFHS ACADEMY ★";
+        String body = "¡Se ha subido un nuevo fanart!\n\nTítulo: " + titulo + "\nAutor: " + autor + "\n\n★ FNAFHS ACADEMY ★";
         sendEmail(adminEmail, subject, body);
     }
 
+    @Async
     public void sendNewUserNotification(String adminEmail, String username, String email) {
         String subject = "👤 Nuevo usuario registrado";
-        String body = "Un nuevo usuario se ha registrado en FNAFHS Academy:\n\n" +
-                "Usuario: " + username + "\n" +
-                "Email: " + email + "\n\n" +
-                "★ FNAFHS ACADEMY ★";
+        String body = "Un nuevo usuario se ha registrado:\n\nUsuario: " + username + "\nEmail: " + email + "\n\n★ FNAFHS ACADEMY ★";
         sendEmail(adminEmail, subject, body);
     }
 
+    @Async
     public void sendVerificationCode(String to, String codigo) {
         String subject = "🔐 Código de verificación - FNAFHS Academy";
         String body = "Tu código de verificación es: " + codigo + "\n\n" +
-                "Este código expirará en 10 minutos.\n\n" +
-                "Si no solicitaste este cambio, ignora este mensaje.\n\n" +
+                "Este código expirará en 15 minutos.\n\n" +
+                "Si no solicitaste este código, ignora este mensaje.\n\n" +
                 "★ FNAFHS ACADEMY ★";
         sendEmail(to, subject, body);
     }
 
+    @Async
     public void sendPasswordChangedConfirmation(String to, String nombre) {
         String subject = "🔒 Tu contraseña ha sido cambiada";
-        String body = "Hola " + nombre + ",\n\n" +
-                "Te confirmamos que tu contraseña ha sido cambiada exitosamente.\n\n" +
-                "Si no realizaste este cambio, por favor contacta al soporte inmediatamente.\n\n" +
-                "★ FNAFHS ACADEMY ★";
+        String body = "Hola " + nombre + ",\n\nTe confirmamos que tu contraseña ha sido cambiada exitosamente.\n\n★ FNAFHS ACADEMY ★";
         sendEmail(to, subject, body);
     }
 }

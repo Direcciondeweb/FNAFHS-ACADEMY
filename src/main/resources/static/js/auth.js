@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const cards = {
         login: document.getElementById('login-card'),
+        loginEmail: document.getElementById('step-login-email'),
         loginCodigo: document.getElementById('step-login-codigo'),
         email: document.getElementById('step-email'),
         codigo: document.getElementById('step-codigo'),
@@ -18,10 +19,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function alertaError(mensaje) {
-        Swal.fire({ icon: 'error', title: 'Ups...', text: mensaje, background: '#1a1a1a', color: '#F6EFEB', confirmButtonColor: '#fd0000' });
+        Swal.fire({
+            icon: 'error', title: 'Ups...', text: mensaje,
+            background: '#1a1a1a', color: '#F6EFEB', confirmButtonColor: '#fd0000'
+        });
     }
+
     function alertaExito(mensaje) {
-        Swal.fire({ icon: 'success', title: '¡Listo!', text: mensaje, background: '#1a1a1a', color: '#F6EFEB', confirmButtonColor: '#d0fc0b' });
+        Swal.fire({
+            icon: 'success', title: '¡Listo!', text: mensaje,
+            background: '#1a1a1a', color: '#F6EFEB', confirmButtonColor: '#d0fc0b',
+            timer: 2000, showConfirmButton: false
+        });
     }
 
     // ---- Mostrar/ocultar contraseña ----
@@ -39,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ================= LOGIN PASO 1 =================
+    // ================= LOGIN PASO 1: usuario + contraseña =================
     document.getElementById('form-login').addEventListener('submit', async (e) => {
         e.preventDefault();
         usernameActual = document.getElementById('username').value.trim();
@@ -57,17 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await res.json();
 
-            if (res.status === 429) {
-                alertaError(data.error);
-                return;
-            }
             if (!res.ok) {
                 alertaError(data.error || 'No se pudo iniciar sesión.');
                 return;
             }
 
-            document.getElementById('login-email-oculto').textContent = data.emailOculto;
-            mostrar('loginCodigo');
+            mostrar('loginEmail');
         } catch (err) {
             alertaError('Error de conexión. Intenta de nuevo.');
         } finally {
@@ -76,7 +80,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ================= LOGIN PASO 2 =================
+    // ================= LOGIN PASO 2: confirmar correo =================
+    document.getElementById('form-login-email').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        emailActual = document.getElementById('login-email-input').value.trim();
+        const btn = document.getElementById('btn-login-email');
+
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        try {
+            const res = await fetch('/api/auth/login-confirmar-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: usernameActual, email: emailActual })
+            });
+            const data = await res.json();
+
+            if (res.status === 429) {
+                alertaError(data.error);
+                return;
+            }
+            if (!res.ok) {
+                alertaError(data.error);
+                return;
+            }
+
+            mostrar('loginCodigo');
+            alertaExito('Código enviado. Revisa tu correo (puede tardar unos segundos).');
+        } catch (err) {
+            alertaError('Error de conexión. Intenta de nuevo.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Enviar código';
+        }
+    });
+
+    document.getElementById('link-cancelar-login-email').addEventListener('click', (e) => {
+        e.preventDefault();
+        mostrar('login');
+    });
+
+    // ================= LOGIN PASO 3: código =================
     document.getElementById('form-login-codigo').addEventListener('submit', async (e) => {
         e.preventDefault();
         const codigo = document.getElementById('login-codigo-input').value.trim();
@@ -118,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/auth/login-reenviar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: usernameActual, password: document.getElementById('password').value })
+                body: JSON.stringify({ username: usernameActual, email: emailActual })
             });
             const data = await res.json();
             if (res.status === 429) {
@@ -138,15 +183,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ================= NAVEGACIÓN RECUPERACIÓN =================
-    document.getElementById('link-olvide-password').addEventListener('click', (e) => { e.preventDefault(); mostrar('email'); });
-    document.getElementById('link-volver-login-1').addEventListener('click', (e) => { e.preventDefault(); mostrar('login'); });
-    document.getElementById('link-volver-login-2').addEventListener('click', (e) => { e.preventDefault(); mostrar('login'); });
-    document.getElementById('link-volver-login-3').addEventListener('click', (e) => { e.preventDefault(); mostrar('login'); });
+    document.getElementById('link-olvide-password').addEventListener('click', (e) => {
+        e.preventDefault();
+        mostrar('email');
+    });
+    document.getElementById('link-volver-login-1').addEventListener('click', (e) => {
+        e.preventDefault();
+        mostrar('login');
+    });
+    document.getElementById('link-volver-login-2').addEventListener('click', (e) => {
+        e.preventDefault();
+        mostrar('login');
+    });
+    document.getElementById('link-volver-login-3')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        mostrar('login');
+    });
 
     // ================= RECUPERACIÓN PASO 1 =================
     document.getElementById('form-email').addEventListener('submit', async (e) => {
         e.preventDefault();
-        emailActual = document.getElementById('recovery-email').value.trim();
+        const emailRecuperacion = document.getElementById('recovery-email').value.trim();
         const btn = document.getElementById('btn-enviar-codigo');
 
         btn.disabled = true;
@@ -156,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/auth/solicitar-codigo', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: emailActual })
+                body: JSON.stringify({ email: emailRecuperacion })
             });
             const data = await res.json();
 
@@ -165,7 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            document.getElementById('email-mostrado').textContent = emailActual;
+            document.getElementById('email-mostrado').textContent = emailRecuperacion;
+            emailActual = emailRecuperacion;
             mostrar('codigo');
         } catch (err) {
             alertaError('Error de conexión. Intenta de nuevo.');
@@ -262,6 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ================= COOLDOWN DE BLOQUEO =================
     function iniciarCooldown(segundos, contexto) {
         const msg = contexto === 'login' ? document.getElementById('login-cooldown-msg') : document.getElementById('cooldown-msg');
         const btn = contexto === 'login' ? document.getElementById('btn-login-paso2') : document.getElementById('btn-verificar-codigo');
