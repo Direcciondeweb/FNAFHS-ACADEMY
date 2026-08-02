@@ -17,7 +17,7 @@ public class EmailService {
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
-    @Value("${spring.mail.username:}")
+    @Value("${email.from:dianix970@gmail.com}")
     private String fromEmail;
 
     private void sendEmail(String to, String subject, String body) {
@@ -32,9 +32,9 @@ public class EmailService {
             message.setSubject(subject);
             message.setText(body);
             mailSender.send(message);
-            log.info("Email enviado a: {}", to);
+            log.info("Email enviado a: {} desde: {}", to, fromEmail);
         } catch (Exception e) {
-            log.error("Error al enviar email a {}: {}", to, e.getMessage());
+            log.error("Error al enviar email a {}: {}", to, e.getMessage(), e);
         }
     }
 
