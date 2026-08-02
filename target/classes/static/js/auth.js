@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ================= LOGIN PASO 2: confirmar correo =================
+    // ================= LOGIN PASO 2: confirmar correo (ahora acepta cualquier correo) =================
     document.getElementById('form-login-email').addEventListener('submit', async (e) => {
         e.preventDefault();
         emailActual = document.getElementById('login-email-input').value.trim();
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/auth/login-paso2', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: usernameActual, codigo })
+                body: JSON.stringify({ username: usernameActual, codigo, email: emailActual })
             });
             const data = await res.json();
 

@@ -46,14 +46,14 @@ public class LoginController {
         if (usuario.getEstado() == null || usuario.getEstado() != 1) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Esta cuenta está inactiva"));
         }
-        if (usuario.getEmail() == null || usuario.getEmail().isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Esta cuenta no tiene un correo registrado. Contacta al administrador."));
-        }
 
         return ResponseEntity.ok(Map.of("message", "Credenciales correctas. Confirma tu correo para continuar."));
     }
 
-    /** Paso 2: el usuario escribe su correo; si coincide con el registrado, se envía el código. */
+    /**
+     * Paso 2: el usuario escribe un correo (ya no se exige que coincida con el registrado).
+     * El código de verificación se envía al correo que el usuario ingresó aquí.
+     */
     @PostMapping("/login-confirmar-email")
     public ResponseEntity<?> confirmarEmail(@Valid @RequestBody LoginConfirmarEmailDTO dto) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(dto.getUsername());
@@ -61,13 +61,9 @@ public class LoginController {
             return ResponseEntity.badRequest().body(Map.of("error", "Sesión inválida, vuelve a intentar el login."));
         }
 
-        Usuario usuario = usuarioOpt.get();
+        String emailDestino = dto.getEmail().trim();
 
-        if (usuario.getEmail() == null || !usuario.getEmail().equalsIgnoreCase(dto.getEmail().trim())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "El correo no coincide con el registrado en esta cuenta."));
-        }
-
-        var bloqueo = codigoVerificacionService.consultarBloqueo(usuario.getEmail());
+        var bloqueo = codigoVerificacionService.consultarBloqueo(emailDestino);
         if (bloqueo.bloqueado()) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
                     "error", "Demasiados intentos fallidos. Intenta más tarde.",
@@ -75,11 +71,11 @@ public class LoginController {
             ));
         }
 
-        codigoVerificacionService.solicitarCodigo(usuario.getEmail());
+        codigoVerificacionService.solicitarCodigo(emailDestino);
         return ResponseEntity.ok(Map.of("message", "Código enviado a tu correo."));
     }
 
-    /** Paso 3: verifica el código y autentica realmente al usuario. */
+    /** Paso 3: verifica el código (contra el correo ingresado en el paso 2) y autentica al usuario. */
     @PostMapping("/login-paso2")
     public ResponseEntity<?> loginPaso2(@Valid @RequestBody LoginPaso2DTO dto, HttpServletRequest request) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(dto.getUsername());
@@ -88,7 +84,7 @@ public class LoginController {
         }
         Usuario usuario = usuarioOpt.get();
 
-        var resultado = codigoVerificacionService.verificarCodigo(usuario.getEmail(), dto.getCodigo());
+        var resultado = codigoVerificacionService.verificarCodigo(dto.getEmail().trim(), dto.getCodigo());
 
         if (resultado.isBloqueado()) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
