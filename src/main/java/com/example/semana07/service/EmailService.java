@@ -1,11 +1,13 @@
 package com.example.semana07.service;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -21,20 +23,35 @@ public class EmailService {
     private String fromEmail;
 
     private void sendEmail(String to, String subject, String body) {
+        log.info("=== Intento de envío ===");
+        log.info("mailSender configurado: {}", mailSender != null);
+        log.info("from: {}", fromEmail);
+        log.info("to: {}", to);
+
         if (mailSender == null) {
-            log.warn("Mail no configurado, no se envió el correo a: {}", to);
+            log.error("JavaMailSender es NULL. Revisa que spring-boot-starter-mail esté en el pom.xml " +
+                    "y que spring.mail.host esté definido en application.properties.");
             return;
         }
+
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(body);
-            mailSender.send(message);
-            log.info("Email enviado a: {} desde: {}", to, fromEmail);
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(body, false);
+
+            mailSender.send(mimeMessage);
+            log.info("Email ENVIADO exitosamente a: {} desde: {}", to, fromEmail);
+
+        } catch (MessagingException e) {
+            log.error("MessagingException al enviar a {}: {}", to, e.getMessage(), e);
         } catch (Exception e) {
-            log.error("Error al enviar email a {}: {}", to, e.getMessage(), e);
+            log.error("Error inesperado al enviar email a {}: {}", to, e.getMessage(), e);
+            if (e.getCause() != null) {
+                log.error("Causa raíz: {}", e.getCause().getMessage());
+            }
         }
     }
 
