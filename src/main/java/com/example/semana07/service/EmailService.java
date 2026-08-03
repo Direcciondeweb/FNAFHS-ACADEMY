@@ -1,57 +1,77 @@
 package com.example.semana07.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+    private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
-    @Autowired(required = false)
-    private JavaMailSender mailSender;
+    // API Key de Brevo (Settings -> SMTP & API -> pestaña "API Keys"), NO la SMTP key/password.
+    @Value("${brevo.api-key:}")
+    private String brevoApiKey;
 
     @Value("${email.from:dianix970@gmail.com}")
     private String fromEmail;
 
-    private void sendEmail(String to, String subject, String body) {
-        log.info("=== Intento de envío ===");
-        log.info("mailSender configurado: {}", mailSender != null);
-        log.info("from: {}", fromEmail);
-        log.info("to: {}", to);
+    @Value("${email.from-name:FNAFHS Academy}")
+    private String fromName;
 
-        if (mailSender == null) {
-            log.error("JavaMailSender es NULL. Revisa que spring-boot-starter-mail esté en el pom.xml " +
-                    "y que spring.mail.host esté definido en application.properties.");
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    private void sendEmail(String to, String subject, String body) {
+        log.info("=== Intento de envío (API Brevo) === to={}, from={}", to, fromEmail);
+
+        if (brevoApiKey == null || brevoApiKey.isBlank()) {
+            log.error("brevo.api-key no está configurado. Define la variable de entorno BREVO_API_KEY.");
             return;
         }
 
+        Map<String, Object> sender = new HashMap<>();
+        sender.put("name", fromName);
+        sender.put("email", fromEmail);
+
+        Map<String, Object> destinatario = new HashMap<>();
+        destinatario.put("email", to);
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("sender", sender);
+        payload.put("to", new Object[]{destinatario});
+        payload.put("subject", subject);
+        payload.put("textContent", body);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", brevoApiKey);
+        headers.set("accept", "application/json");
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(body, false);
-
-            mailSender.send(mimeMessage);
-            log.info("Email ENVIADO exitosamente a: {} desde: {}", to, fromEmail);
-
-        } catch (MessagingException e) {
-            log.error("MessagingException al enviar a {}: {}", to, e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Error inesperado al enviar email a {}: {}", to, e.getMessage(), e);
-            if (e.getCause() != null) {
-                log.error("Causa raíz: {}", e.getCause().getMessage());
+            ResponseEntity<String> response = restTemplate.postForEntity(BREVO_API_URL, request, String.class);
+            HttpStatusCode status = response.getStatusCode();
+            if (status.is2xxSuccessful()) {
+                log.info("Email ENVIADO exitosamente a: {} (status {})", to, status.value());
+            } else {
+                log.error("Brevo respondió con error. status={}, body={}", status.value(), response.getBody());
             }
+        } catch (RestClientException e) {
+            log.error("Error al llamar a la API de Brevo para {}: {}", to, e.getMessage(), e);
         }
     }
 
