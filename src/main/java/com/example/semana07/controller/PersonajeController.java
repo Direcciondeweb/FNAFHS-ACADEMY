@@ -2,35 +2,29 @@ package com.example.semana07.controller;
 
 import com.example.semana07.entity.Personaje;
 import com.example.semana07.entity.Usuario;
+import com.example.semana07.service.CloudStorageService;
 import com.example.semana07.service.PersonajeService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/personajes")
-@CrossOrigin(origins = "*")
 public class PersonajeController {
 
     @Autowired
     private PersonajeService personajeService;
 
-    @Value("${file.upload-dir:./imagenes/}")
-    private String uploadDir;
-
-    private static final String CARPETA = "personajes";
+    @Autowired
+    private CloudStorageService cloudStorageService;
 
     @GetMapping
     public ResponseEntity<List<Personaje>> listar() {
@@ -63,17 +57,19 @@ public class PersonajeController {
             nuevoPersonaje.setEstado(1);
 
             if (imagenFile != null && !imagenFile.isEmpty()) {
-                nuevoPersonaje.setImagenUrl(guardarImagen(imagenFile, CARPETA));
+                String url = cloudStorageService.uploadFile(imagenFile, "personajes");
+                nuevoPersonaje.setImagenUrl(url);
             }
             if (imagenOriginalFile != null && !imagenOriginalFile.isEmpty()) {
-                nuevoPersonaje.setImagenOriginalUrl(guardarImagen(imagenOriginalFile, CARPETA + "/original"));
+                String url = cloudStorageService.uploadFile(imagenOriginalFile, "personajes/original");
+                nuevoPersonaje.setImagenOriginalUrl(url);
             }
 
             Map<String, String> sesion = datosSesion(session);
             Personaje guardado = personajeService.guardar(nuevoPersonaje, sesion.get("usuario"), sesion.get("rol"));
             return ResponseEntity.ok(guardado);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -95,19 +91,27 @@ public class PersonajeController {
             personaje.setDescripcion(descripcion != null ? descripcion : "");
 
             if (imagenFile != null && !imagenFile.isEmpty()) {
-                if (personaje.getImagenUrl() != null) eliminarImagenAnterior(personaje.getImagenUrl());
-                personaje.setImagenUrl(guardarImagen(imagenFile, CARPETA));
+                if (personaje.getImagenUrl() != null) {
+                    String publicId = cloudStorageService.extraerPublicId(personaje.getImagenUrl());
+                    cloudStorageService.deleteFile(publicId);
+                }
+                String url = cloudStorageService.uploadFile(imagenFile, "personajes");
+                personaje.setImagenUrl(url);
             }
             if (imagenOriginalFile != null && !imagenOriginalFile.isEmpty()) {
-                if (personaje.getImagenOriginalUrl() != null) eliminarImagenAnterior(personaje.getImagenOriginalUrl());
-                personaje.setImagenOriginalUrl(guardarImagen(imagenOriginalFile, CARPETA + "/original"));
+                if (personaje.getImagenOriginalUrl() != null) {
+                    String publicId = cloudStorageService.extraerPublicId(personaje.getImagenOriginalUrl());
+                    cloudStorageService.deleteFile(publicId);
+                }
+                String url = cloudStorageService.uploadFile(imagenOriginalFile, "personajes/original");
+                personaje.setImagenOriginalUrl(url);
             }
 
             Map<String, String> sesion = datosSesion(session);
             Personaje actualizado = personajeService.guardar(personaje, sesion.get("usuario"), sesion.get("rol"));
             return ResponseEntity.ok(actualizado);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -124,9 +128,17 @@ public class PersonajeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id, HttpSession session) {
         Personaje personaje = personajeService.obtenerPorId(id).orElse(null);
-        if (personaje != null) {
-            if (personaje.getImagenUrl() != null) eliminarImagenAnterior(personaje.getImagenUrl());
-            if (personaje.getImagenOriginalUrl() != null) eliminarImagenAnterior(personaje.getImagenOriginalUrl());
+        try {
+            if (personaje != null) {
+                if (personaje.getImagenUrl() != null) {
+                    cloudStorageService.deleteFile(cloudStorageService.extraerPublicId(personaje.getImagenUrl()));
+                }
+                if (personaje.getImagenOriginalUrl() != null) {
+                    cloudStorageService.deleteFile(cloudStorageService.extraerPublicId(personaje.getImagenOriginalUrl()));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         Map<String, String> sesion = datosSesion(session);
         personajeService.eliminar(id, sesion.get("usuario"), sesion.get("rol"));
@@ -144,27 +156,5 @@ public class PersonajeController {
             datos.put("rol", "N/A");
         }
         return datos;
-    }
-
-    private String guardarImagen(MultipartFile imagen, String subCarpeta) throws IOException {
-        Path rutaCarpeta = Paths.get(uploadDir, subCarpeta);
-        if (!Files.exists(rutaCarpeta)) Files.createDirectories(rutaCarpeta);
-        String extension = "";
-        String nombreOriginal = imagen.getOriginalFilename();
-        if (nombreOriginal != null && nombreOriginal.contains(".")) {
-            extension = nombreOriginal.substring(nombreOriginal.lastIndexOf("."));
-        }
-        String nombreArchivo = UUID.randomUUID().toString() + extension;
-        Files.write(Paths.get(uploadDir, subCarpeta, nombreArchivo), imagen.getBytes());
-        return "/imagenes/" + subCarpeta + "/" + nombreArchivo;
-    }
-
-    private void eliminarImagenAnterior(String imagenUrl) {
-        try {
-            String rutaRelativa = imagenUrl.replace("/imagenes/", "");
-            Files.deleteIfExists(Paths.get(uploadDir, rutaRelativa));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -2,36 +2,30 @@ package com.example.semana07.controller;
 
 import com.example.semana07.entity.Logo;
 import com.example.semana07.entity.Usuario;
+import com.example.semana07.service.CloudStorageService;
 import com.example.semana07.service.LogoService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/logo")
-@CrossOrigin(origins = "*")
 public class LogoController {
 
     @Autowired
     private LogoService logoService;
 
-    @Value("${file.upload-dir:./imagenes/}")
-    private String uploadDir;
-
-    private static final String CARPETA = "logo";
+    @Autowired
+    private CloudStorageService cloudStorageService;
 
     @GetMapping
     public ResponseEntity<List<Logo>> listar() {
@@ -52,22 +46,13 @@ public class LogoController {
     public ResponseEntity<?> subir(@RequestParam("imagen") MultipartFile imagen, HttpSession session) {
         try {
             if (imagen.isEmpty()) {
-                return ResponseEntity.badRequest().body("No se seleccionó ningún archivo");
+                return ResponseEntity.badRequest().body(Map.of("error", "No se seleccionó ningún archivo"));
             }
 
-            Path rutaCarpeta = Paths.get(uploadDir, CARPETA);
-            if (!Files.exists(rutaCarpeta)) Files.createDirectories(rutaCarpeta);
-
-            String extension = "";
-            String nombreOriginal = imagen.getOriginalFilename();
-            if (nombreOriginal != null && nombreOriginal.contains(".")) {
-                extension = nombreOriginal.substring(nombreOriginal.lastIndexOf("."));
-            }
-            String nombreArchivo = UUID.randomUUID().toString() + extension;
-            Files.write(Paths.get(uploadDir, CARPETA, nombreArchivo), imagen.getBytes());
+            String url = cloudStorageService.uploadFile(imagen, "logo");
 
             Logo nuevoLogo = new Logo();
-            nuevoLogo.setImagenUrl("/imagenes/" + CARPETA + "/" + nombreArchivo);
+            nuevoLogo.setImagenUrl(url);
             nuevoLogo.setTitulo("Logo " + System.currentTimeMillis());
             nuevoLogo.setActivo(false);
 
@@ -95,8 +80,8 @@ public class LogoController {
         try {
             Optional<Logo> logoOpt = logoService.obtenerPorId(id);
             if (logoOpt.isPresent() && logoOpt.get().getImagenUrl() != null) {
-                String rutaRelativa = logoOpt.get().getImagenUrl().replace("/imagenes/", "");
-                Files.deleteIfExists(Paths.get(uploadDir, rutaRelativa));
+                String publicId = cloudStorageService.extraerPublicId(logoOpt.get().getImagenUrl());
+                cloudStorageService.deleteFile(publicId);
             }
             Map<String, String> sesion = datosSesion(session);
             logoService.eliminar(id, sesion.get("usuario"), sesion.get("rol"));

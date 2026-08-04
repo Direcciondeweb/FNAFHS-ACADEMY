@@ -2,35 +2,29 @@ package com.example.semana07.controller;
 
 import com.example.semana07.entity.SliderImage;
 import com.example.semana07.entity.Usuario;
+import com.example.semana07.service.CloudStorageService;
 import com.example.semana07.service.SliderImageService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/slider")
-@CrossOrigin(origins = "*")
 public class SliderController {
 
     @Autowired
     private SliderImageService sliderImageService;
 
-    @Value("${file.upload-dir:./imagenes/}")
-    private String uploadDir;
-
-    private static final String CARPETA = "slider";
+    @Autowired
+    private CloudStorageService cloudStorageService;
 
     @GetMapping
     public ResponseEntity<List<SliderImage>> listar() {
@@ -46,22 +40,13 @@ public class SliderController {
     public ResponseEntity<?> subirImagen(@RequestParam("imagen") MultipartFile imagen, HttpSession session) {
         try {
             if (imagen.isEmpty()) {
-                return ResponseEntity.badRequest().body("No se seleccionó ningún archivo");
+                return ResponseEntity.badRequest().body(Map.of("error", "No se seleccionó ningún archivo"));
             }
 
-            Path rutaCarpeta = Paths.get(uploadDir, CARPETA);
-            if (!Files.exists(rutaCarpeta)) Files.createDirectories(rutaCarpeta);
-
-            String extension = "";
-            String nombreOriginal = imagen.getOriginalFilename();
-            if (nombreOriginal != null && nombreOriginal.contains(".")) {
-                extension = nombreOriginal.substring(nombreOriginal.lastIndexOf("."));
-            }
-            String nombreArchivo = UUID.randomUUID().toString() + extension;
-            Files.write(Paths.get(uploadDir, CARPETA, nombreArchivo), imagen.getBytes());
+            String url = cloudStorageService.uploadFile(imagen, "slider");
 
             SliderImage nuevaImagen = new SliderImage();
-            nuevaImagen.setImagenUrl("/imagenes/" + CARPETA + "/" + nombreArchivo);
+            nuevaImagen.setImagenUrl(url);
             nuevaImagen.setActivo(false);
             nuevaImagen.setOrden(sliderImageService.listarTodas().size());
 
@@ -90,8 +75,8 @@ public class SliderController {
             List<SliderImage> todas = sliderImageService.listarTodas();
             for (SliderImage img : todas) {
                 if (img.getId().equals(id) && img.getImagenUrl() != null) {
-                    String rutaRelativa = img.getImagenUrl().replace("/imagenes/", "");
-                    Files.deleteIfExists(Paths.get(uploadDir, rutaRelativa));
+                    String publicId = cloudStorageService.extraerPublicId(img.getImagenUrl());
+                    cloudStorageService.deleteFile(publicId);
                     break;
                 }
             }
