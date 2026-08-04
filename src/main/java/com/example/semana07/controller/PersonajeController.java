@@ -68,8 +68,15 @@ public class PersonajeController {
             Map<String, String> sesion = datosSesion(session);
             Personaje guardado = personajeService.guardar(nuevoPersonaje, sesion.get("usuario"), sesion.get("rol"));
             return ResponseEntity.ok(guardado);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+
+        } catch (Exception e) {
+            // Log completo en la consola de Render para ver la causa real del fallo
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Error al crear personaje",
+                            "detalle", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
+                    ));
         }
     }
 
@@ -110,8 +117,14 @@ public class PersonajeController {
             Map<String, String> sesion = datosSesion(session);
             Personaje actualizado = personajeService.guardar(personaje, sesion.get("usuario"), sesion.get("rol"));
             return ResponseEntity.ok(actualizado);
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Error al actualizar personaje",
+                            "detalle", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
+                    ));
         }
     }
 
@@ -121,14 +134,17 @@ public class PersonajeController {
             personajeService.actualizarEstado(id, estado);
             return ResponseEntity.ok(Map.of("mensaje", "Estado actualizado"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id, HttpSession session) {
-        Personaje personaje = personajeService.obtenerPorId(id).orElse(null);
+    public ResponseEntity<?> eliminar(@PathVariable Long id, HttpSession session) {
         try {
+            Personaje personaje = personajeService.obtenerPorId(id).orElse(null);
+
             if (personaje != null) {
                 if (personaje.getImagenUrl() != null) {
                     cloudStorageService.deleteFile(cloudStorageService.extraerPublicId(personaje.getImagenUrl()));
@@ -137,12 +153,19 @@ public class PersonajeController {
                     cloudStorageService.deleteFile(cloudStorageService.extraerPublicId(personaje.getImagenOriginalUrl()));
                 }
             }
-        } catch (IOException e) {
+
+            Map<String, String> sesion = datosSesion(session);
+            personajeService.eliminar(id, sesion.get("usuario"), sesion.get("rol"));
+            return ResponseEntity.noContent().build();
+
+        } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Error al eliminar personaje",
+                            "detalle", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
+                    ));
         }
-        Map<String, String> sesion = datosSesion(session);
-        personajeService.eliminar(id, sesion.get("usuario"), sesion.get("rol"));
-        return ResponseEntity.noContent().build();
     }
 
     private Map<String, String> datosSesion(HttpSession session) {
