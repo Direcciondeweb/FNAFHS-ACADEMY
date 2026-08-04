@@ -101,10 +101,10 @@ public class EmailService {
     @Async
     public void sendVerificationCode(String to, String codigo) {
         String subject = "🔐 Código de verificación - FNAFHS Academy";
-        String body = "Tu código de verificación es: " + codigo + "\n\n" +
+        String body = "🌟Tu código de verificación es: " + codigo + "\n\n 🌟" +
                 "Este código expirará en 15 minutos.\n\n" +
                 "Si no solicitaste este código, ignora este mensaje.\n\n" +
-                "★ FNAFHS ACADEMY ★";
+                "🌟 FNAFHS ACADEMY 🌟";
         sendEmail(to, subject, body);
     }
 

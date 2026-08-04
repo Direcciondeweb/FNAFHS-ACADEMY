@@ -25,7 +25,10 @@ public class DashboardController {
     public String index() {
         return "index";
     }
-
+    @GetMapping("/personajes")
+    public String personajes() {
+        return "personajes";
+    }
     @GetMapping("/fanarts")
     public String fanarts() {
         return "fanarts";

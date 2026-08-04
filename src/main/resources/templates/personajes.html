@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personajes - FNAFHS ACADEMY</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/personajes.css}">
+</head>
+<body th:attr="data-logged=${#authorization.expression('isAuthenticated()')}">
+
+<header class="site-header">
+    <div class="header-inner">
+        <div class="brand">
+            <a th:href="@{/}" class="brand-link">
+                <h1>★ FNAFHS <i class="fa-solid fa-book"></i> ACADEMY ★</h1>
+            </a>
+        </div>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <ul class="nav-list" id="nav-list">
+            <li class="nav-item"><a class="nav-link" th:href="@{/}"><i class="fa-solid fa-house"></i> Inicio</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/personajes}"><i class="fa-solid fa-user"></i> Personajes</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/arte}"><i class="fa-solid fa-palette"></i> Arte</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/videos}"><i class="fa-solid fa-film"></i> Videos</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/comics}"><i class="fa-solid fa-book-open"></i> Comics</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/descartados}"><i class="fa-solid fa-trash"></i> Descartados</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/resenas}"><i class="fa-solid fa-comments"></i> Reseñas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/popular}"><i class="fa-solid fa-fire"></i> Lo Popular</a></li>
+
+            <li class="nav-item" sec:authorize="!isAuthenticated()">
+                <a class="nav-link" th:href="@{/login}"><i class="fa-solid fa-right-to-bracket"></i> Ingresar</a>
+            </li>
+            <li class="nav-item" sec:authorize="!isAuthenticated()">
+                <a class="nav-link" th:href="@{/registro}"><i class="fa-solid fa-user-plus"></i> Registrarse</a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <a class="nav-link" th:href="@{/dashboard/user}">
+                    <i class="fa-solid fa-circle-user"></i>
+                    <span sec:authentication="name">Usuario</span>
+                </a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <a class="nav-link" th:href="@{/logout}"><i class="fa-solid fa-right-from-bracket"></i> Salir</a>
+            </li>
+        </ul>
+    </div>
+</header>
+
+<section class="personajes-page">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Personajes</h2>
+        </div>
+
+        <div class="filter-container">
+            <button class="filter-btn" id="filter-toggle">
+                <i class="fa-solid fa-filter"></i> Filtrar
+            </button>
+
+            <div class="filter-panel" id="filter-panel">
+                <div class="filter-header">
+                    <h3>Filtrar por categoría</h3>
+                    <button class="close-filter" id="close-filter">&times;</button>
+                </div>
+                <div class="filter-group">
+                    <label>Categoría</label>
+                    <select id="filtro-categoria">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Buscar por nombre</label>
+                    <input type="text" id="filtro-nombre" placeholder="Ej: Freddy...">
+                </div>
+                <div class="filter-actions">
+                    <button class="apply-filter" id="apply-filter">Aplicar</button>
+                    <button class="reset-filter" id="reset-filter">Limpiar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="personajes-grid" id="personajes-grid">
+            <p class="empty-state">Cargando personajes...</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============ MODAL: Academy vs Original ============ -->
+<div id="personaje-modal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" id="modal-close">&times;</span>
+        <h2 id="modal-nombre">Nombre</h2>
+        <span id="modal-categoria" class="modal-categoria"></span>
+
+        <div class="imagenes-container">
+            <div class="imagen-wrapper">
+                <img id="modal-imagen-academy" src="" alt="Versión Academy">
+                <span class="imagen-label"><i class="fa-solid fa-graduation-cap"></i> FNAFHS Academy</span>
+            </div>
+
+            <div class="imagen-wrapper original-wrapper hidden" id="original-wrapper">
+                <img id="modal-imagen-original" src="" alt="Versión Original">
+                <span class="imagen-label"><i class="fa-solid fa-gamepad"></i> FNAF Original</span>
+            </div>
+        </div>
+
+        <button class="second-image-btn" id="btn-ver-original">
+            <i class="fa-solid fa-eye"></i> Ver versión original
+        </button>
+
+        <p id="modal-descripcion" class="modal-descripcion"></p>
+    </div>
+</div>
+
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <div class="brand">
+                <h1>★ FNAFHS ACADEMY ★</h1>
+            </div>
+            <div class="social-links">
+                <a href="https://youtube.com/@fnafhsacademyofficial?si=Ydohr12Yq5vRzw_z" target="_blank" rel="noopener" class="social-link">
+                    <i class="fa-brands fa-youtube"></i> YouTube
+                </a>
+                <a href="https://www.tiktok.com/@fnafhsacademyofficial?lang=es" target="_blank" rel="noopener" class="social-link">
+                    <i class="fa-brands fa-tiktok"></i> TikTok
+                </a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; FNAFHS Academy. Proyecto de fans, sin fines de lucro.</p>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/personajes.js}"></script>
+</body>
+</html>
